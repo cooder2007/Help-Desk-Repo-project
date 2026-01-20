@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ticket Detail</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Ticket Detail</h1>
+    <nav>
+      <a href="dashboard.html">Back to Dashboard</a>
+    </nav>
+  </header>
+  <main>
+    <section class="card">
+      <div id="ticketHeader"></div>
+      <div id="messagesBox" style="max-height: 350px; overflow:auto; border:1px solid #1f2937; padding:8px; border-radius:8px;"></div>
+
+      <form id="statusForm" style="margin-top:10px;">
+        <label>Update status
+          <select name="status">
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </label>
+        <button type="submit">Update</button>
+        <span id="statusMsg" class="notice"></span>
+      </form>
+
+      <form id="replyForm" style="margin-top:10px;">
+        <textarea name="message" required minlength="2" placeholder="Write a reply..."></textarea>
+        <button type="submit">Send</button>
+        <span id="replyMsg" class="notice"></span>
+      </form>
+    </section>
+  </main>
+
+  <script type="module">
+    import { api } from './js/api.js';
+    import { loadAuth, getAuth, requireRole } from './js/auth.js';
+
+    loadAuth();
+    if (!requireRole(['staff','admin','student'])) {
+      alert('Please log in.');
+      window.location.href = 'index.html';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get('ticket');
+    const ticketHeader = document.getElementById('ticketHeader');
+    const messagesBox = document.getElementById('messagesBox');
+    const statusForm = document.getElementById('statusForm');
+    const statusMsg = document.getElementById('statusMsg');
+    const replyForm = document.getElementById('replyForm');
+    const replyMsg = document.getElementById('replyMsg');
+
+    async function loadTicket() {
+      const { token, user } = getAuth();
+      try {
+        const data = await api(`/tickets/${ticketId}`, { token });
+        ticketHeader.innerHTML = `
+          <h2>#${data.ticket.id} — ${data.ticket.title}</h2>
+          <p class="meta">Category: ${data.ticket.category} • Status: ${data.ticket.status} • Student ID: ${data.ticket.student_id}</p>
+          <p>${data.ticket.description}</p>
+        `;
+        messagesBox.innerHTML = data.messages
+          .map(
+            (m) => `
+          <div style="margin-bottom:8px;">
+            <strong>${m.author_name} (${m.author_role})</strong>
+            <div>${m.message}</div>
+            <div class="meta">${new Date(m.created_at).toLocaleString()}</div>
+          </div>`
+          )
+          .join('');
+
+        // Only staff/admin can update status
+        statusForm.style.display = requireRole(['staff','admin']) ? 'block' : 'none';
+      } catch (e) {
+        ticketHeader.innerHTML = `<p class="notice">Error: ${e.message}</p>`;
+      }
+    }
+
+    statusForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { token } = getAuth();
+      const status = new FormData(statusForm).get('status');
+      try {
+        await api(`/tickets/${ticketId}/status`, { method: 'PATCH', body: { status }, token });
+        statusMsg.textContent = 'Status updated.';
+        await loadTicket();
+      } catch (err) {
+        statusMsg.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    replyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { token } = getAuth();
+      const message = new FormData(replyForm).get('message');
+      try {
+        await api(`/tickets/${ticketId}/messages`, { method: 'POST', body: { message }, token });
+        replyMsg.textContent = 'Message sent.';
+        replyForm.reset();
+        await loadTicket();
+      } catch (err) {
+        replyMsg.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    await loadTicket();
+  </script>
+</body>
+</html>

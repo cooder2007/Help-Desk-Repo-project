@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Help Desk Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Dashboard</h1>
+    <nav>
+      <a href="index.html">Submit Ticket</a>
+    </nav>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Tickets</h2>
+      <div id="filters">
+        <label>Status
+          <select id="statusFilter">
+            <option value="">All</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </label>
+        <label>Category
+          <select id="categoryFilter">
+            <option value="">All</option>
+            <option value="academics">Academics</option>
+            <option value="finance">Finance</option>
+            <option value="hostel">Hostel</option>
+            <option value="it">IT</option>
+          </select>
+        </label>
+        <button id="applyFilters">Apply</button>
+      </div>
+      <div id="ticketsList"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { api } from './js/api.js';
+    import { loadAuth, getAuth } from './js/auth.js';
+
+    const ticketsListEl = document.getElementById('ticketsList');
+    const statusFilter = document.getElementById('statusFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const applyFilters = document.getElementById('applyFilters');
+
+    loadAuth();
+
+    async function loadTickets() {
+      const { token } = getAuth();
+      if (!token) {
+        ticketsListEl.innerHTML = '<p class="notice">Please log in.</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      if (statusFilter.value) params.append('status', statusFilter.value);
+      if (categoryFilter.value) params.append('category', categoryFilter.value);
+
+      try {
+        const tickets = await api(`/tickets?${params.toString()}`, { token });
+        ticketsListEl.innerHTML = tickets
+          .map(
+            (t) => `
+          <div class="ticket">
+            <div><strong>${t.title}</strong></div>
+            <div class="meta">#${t.id} • ${t.category} • ${t.status} • ${new Date(t.created_at).toLocaleString()}</div>
+            <button data-id="${t.id}" class="viewBtn">View</button>
+          </div>`
+          )
+          .join('');
+        document.querySelectorAll('.viewBtn').forEach((b) =>
+          b.addEventListener('click', () => (window.location.href = `admin.html?ticket=${b.dataset.id}`))
+        );
+      } catch (e) {
+        ticketsListEl.innerHTML = `<p class="notice">Error: ${e.message}</p>`;
+      }
+    }
+
+    applyFilters.addEventListener('click', loadTickets);
+    await loadTickets();
+  </script>
+</body>
+</html>

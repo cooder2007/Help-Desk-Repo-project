@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>College Help Desk</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>College Help Desk</h1>
+    <nav>
+      <button id="loginBtn">Login</button>
+      <button id="registerBtn">Register</button>
+    </nav>
+  </header>
+
+  <div id="authModal" class="card" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); max-width:500px; z-index:1000;">
+  <h3 id="authTitle">Login</h3>
+  <form id="authForm">
+    <label>Email <input type="email" name="email" required /></label>
+    <label>Password <input type="password" name="password" required minlength="6" /></label>
+    <div id="registerFields" style="display:none;">
+      <label>Name <input type="text" name="name" /></label>
+      <label>Role
+        <select name="role">
+          <option value="student">Student</option>
+          <option value="staff">Staff</option>
+          <option value="admin">Admin</option>
+        </select>
+      </label>
+    </div>
+    <button type="submit">Submit</button>
+    <button type="button" id="closeAuth">Close</button>
+    <div id="authMsg" class="notice"></div>
+  </form>
+</div>
+
+<script type="module">
+  import { initTickets } from './js/tickets.js';
+  import { login, register, loadAuth, getAuth, logout } from './js/auth.js';
+
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const authModal = document.getElementById('authModal');
+  const authTitle = document.getElementById('authTitle');
+  const authForm = document.getElementById('authForm');
+  const registerFields = document.getElementById('registerFields');
+  const closeAuth = document.getElementById('closeAuth');
+  const authMsg = document.getElementById('authMsg');
+
+  loadAuth();
+
+  function openModal(mode) {
+    authModal.style.display = 'block';
+    authMsg.textContent = '';
+    if (mode === 'login') {
+      authTitle.textContent = 'Login';
+      registerFields.style.display = 'none';
+      authForm.dataset.mode = 'login';
+    } else {
+      authTitle.textContent = 'Register';
+      registerFields.style.display = 'block';
+      authForm.dataset.mode = 'register';
+    }
+  }
+
+  loginBtn.addEventListener('click', () => openModal('login'));
+  registerBtn.addEventListener('click', () => openModal('register'));
+  closeAuth.addEventListener('click', () => (authModal.style.display = 'none'));
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(authForm);
+    const mode = authForm.dataset.mode;
+    try {
+      if (mode === 'login') {
+        await login(form.get('email'), form.get('password'));
+        authMsg.textContent = 'Logged in.';
+      } else {
+        await register({
+          name: form.get('name'),
+          email: form.get('email'),
+          password: form.get('password'),
+          role: form.get('role'),
+        });
+        authMsg.textContent = 'Registered. Now log in.';
+      }
+      authModal.style.display = 'none';
+      await initTickets();
+    } catch (err) {
+      authMsg.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Optional: show current user and logout
+  const header = document.querySelector('header nav');
+  const userBadge = document.createElement('span');
+  userBadge.style.marginLeft = '12px';
+  header.appendChild(userBadge);
+
+  function refreshUserBadge() {
+    const auth = getAuth();
+    if (auth?.user) {
+      userBadge.textContent = `${auth.user.name} (${auth.user.role})`;
+      const outBtn = document.createElement('button');
+      outBtn.textContent = 'Logout';
+      outBtn.addEventListener('click', async () => {
+        logout();
+        userBadge.textContent = '';
+        await initTickets();
+      });
+      header.appendChild(outBtn);
+    } else {
+      userBadge.textContent = '';
+    }
+  }
+
+  refreshUserBadge();
+  await initTickets();
+</script>
+ 
+  <main>
+    <section class="card">
+      <h2>Submit a ticket</h2>
+      <form id="ticketForm">
+        <label>Title <input type="text" name="title" required minlength="5" /></label>
+        <label>Category
+          <select name="category" required>
+            <option value="academics">Academics</option>
+            <option value="finance">Finance</option>
+            <option value="hostel">Hostel</option>
+            <option value="it">IT</option>
+          </select>
+        </label>
+        <label>Priority
+          <select name="priority">
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </label>
+        <label>Description
+          <textarea name="description" required minlength="10"></textarea>
+        </label>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="ticketResult" class="notice"></div>
+    </section>
+
+    <section class="card">
+      <h2>Your tickets</h2>
+      <div id="ticketsList"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/tickets.js"></script>
+</body>
+</html>
