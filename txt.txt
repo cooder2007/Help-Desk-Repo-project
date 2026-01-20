@@ -1,0 +1,28 @@
+college-helpdesk/
+├─ Help-Desk-server/
+│  ├─ src/
+│  │  ├─ app.js
+│  │  ├─ routes/
+│  │  │  ├─ tickets.js
+│  │  │  ├─ users.js
+│  │  ├─ db/
+│  │  │  ├─ pool.js
+│  │  ├─ middleware/
+│  │  │  ├─ auth.js
+│  │  ├─ controllers/
+│  │  │  ├─ ticketsController.js
+│  │  │  ├─ usersController.js
+│  ├─ package.json
+│  ├─ .env
+├─ Help-desk-Client/
+│  ├─ index.html
+│  ├─ dashboard.html
+│  ├─ admin.html
+│  ├─ css/
+│  │  ├─ styles.css
+│  ├─ js/
+│  │  ├─ api.js
+│  │  ├─ tickets.js
+│  │  ├─ auth.js
+├─ docs/
+│  ├─ README.md
