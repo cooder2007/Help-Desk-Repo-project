@@ -1,3 +1,5 @@
+This is the proper file structure for now:
+
 college-helpdesk/
 ├─ Help-Desk-server/
 │  ├─ src/
@@ -26,3 +28,850 @@ college-helpdesk/
 │  │  ├─ auth.js
 ├─ docs/
 │  ├─ README.md
+
+All code files are available in a single ".txt" file. If a user is required to use any AI, they should not search and copy-paste every code snippet repeatedly.
+Files not mentioned are either unavailable or too large to upload, such as the note.js package.
+
+college-helpdesk/Help-Desk-server/src/app.js:
+
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+require('dotenv').config();
+
+const ticketsRouter = require('./routes/tickets');
+const usersRouter = require('./routes/users');
+
+const app = express();
+
+app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+app.use(express.json());
+app.use(morgan('dev'));
+
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+app.use('/api/users', usersRouter);
+app.use('/api/tickets', ticketsRouter);
+
+const port = process.env.PORT || 4000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
+
+college-helpdesk/Help-Desk-server/src/routes/tickets.js:
+
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const pool = require('../db/pool');
+const auth = require('../middleware/auth');
+
+const router = express.Router();
+
+// Create ticket (student)
+router.post(
+  '/',
+  auth(['student']),
+  [
+    body('title').isLength({ min: 5 }),
+    body('description').isLength({ min: 10 }),
+    body('category').isIn(['academics','finance','hostel','it']),
+    body('priority').optional().isIn(['low','normal','high','urgent']),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { title, description, category, priority = 'normal' } = req.body;
+    const { rows } = await pool.query(
+      `INSERT INTO tickets (student_id, title, description, category, priority)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [req.user.id, title, description, category, priority]
+    );
+    res.status(201).json(rows[0]);
+  }
+);
+
+// List tickets (student sees own; staff/admin see all)
+router.get('/', auth(['student','staff','admin']), async (req, res) => {
+  const role = req.user.role;
+  const { status, category } = req.query;
+
+  let base = 'SELECT t.*, u.name AS student_name FROM tickets t JOIN users u ON u.id=t.student_id';
+  const params = [];
+  const where = [];
+
+  if (role === 'student') {
+    where.push('t.student_id=$' + (params.length + 1));
+    params.push(req.user.id);
+  }
+  if (status) {
+    where.push('t.status=$' + (params.length + 1));
+    params.push(status);
+  }
+  if (category) {
+    where.push('t.category=$' + (params.length + 1));
+    params.push(category);
+  }
+
+  const sql = where.length ? `${base} WHERE ${where.join(' AND ')} ORDER BY t.created_at DESC`
+                           : `${base} ORDER BY t.created_at DESC`;
+
+  const { rows } = await pool.query(sql, params);
+  res.json(rows);
+});
+
+// Get single ticket + messages
+router.get('/:id', auth(['student','staff','admin']), async (req, res) => {
+  const ticketId = Number(req.params.id);
+  const { rows: trows } = await pool.query('SELECT * FROM tickets WHERE id=$1', [ticketId]);
+  const ticket = trows[0];
+  if (!ticket) return res.status(404).json({ error: 'Not found' });
+
+  if (req.user.role === 'student' && ticket.student_id !== req.user.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const { rows: mrows } = await pool.query(
+    `SELECT tm.*, u.name AS author_name, u.role AS author_role
+     FROM ticket_messages tm JOIN users u ON u.id=tm.author_id
+     WHERE tm.ticket_id=$1 ORDER BY tm.created_at ASC`,
+    [ticketId]
+  );
+
+  res.json({ ticket, messages: mrows });
+});
+
+// Add message (student or staff)
+router.post('/:id/messages', auth(['student','staff','admin']), [body('message').isLength({ min: 2 })], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const ticketId = Number(req.params.id);
+  const { rows: trows } = await pool.query('SELECT * FROM tickets WHERE id=$1', [ticketId]);
+  const ticket = trows[0];
+  if (!ticket) return res.status(404).json({ error: 'Not found' });
+
+  if (req.user.role === 'student' && ticket.student_id !== req.user.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const { rows } = await pool.query(
+    'INSERT INTO ticket_messages (ticket_id, author_id, message) VALUES ($1,$2,$3) RETURNING *',
+    [ticketId, req.user.id, req.body.message]
+  );
+
+  // Update ticket timestamp
+  await pool.query('UPDATE tickets SET updated_at=NOW() WHERE id=$1', [ticketId]);
+
+  res.status(201).json(rows[0]);
+});
+
+// Update status (staff/admin)
+router.patch('/:id/status', auth(['staff','admin']), [body('status').isIn(['open','in_progress','resolved','closed'])], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const ticketId = Number(req.params.id);
+  const { rows } = await pool.query('UPDATE tickets SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING *', [
+    req.body.status,
+    ticketId,
+  ]);
+  if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+  res.json(rows[0]);
+});
+
+module.exports = router;
+
+college-helpdesk/Help-Desk-server/src/routes/users.js:
+
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
+const pool = require('../db/pool');
+
+const router = express.Router();
+
+// Register
+router.post(
+  '/register',
+  [
+    body('name').isLength({ min: 2 }),
+    body('email').isEmail(),
+    body('password').isLength({ min: 6 }),
+    body('role').isIn(['student','staff','admin']),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { name, email, password, role } = req.body;
+    const hash = await bcrypt.hash(password, 10);
+
+    try {
+      const { rows } = await pool.query(
+        'INSERT INTO users (name, email, role, password_hash) VALUES ($1,$2,$3,$4) RETURNING id, name, email, role',
+        [name, email, role, hash]
+      );
+      res.status(201).json(rows[0]);
+    } catch (e) {
+      if (e.code === '23505') return res.status(409).json({ error: 'Email already exists' });
+      res.status(500).json({ error: 'Server error' });
+    }
+  }
+);
+
+// Login
+router.post('/login', [body('email').isEmail(), body('password').notEmpty()], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const { email, password } = req.body;
+  const { rows } = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
+  const user = rows[0];
+  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+  const ok = await bcrypt.compare(password, user.password_hash);
+  if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+
+  const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '8h' });
+  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+});
+
+module.exports = router;
+
+college-helpdesk/Help-Desk-server/src/db/pool.js:
+
+const { Pool } = require('pg');
+require('dotenv').config();
+
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+module.exports = pool;
+
+college-helpdesk/Help-Desk-server/src/middleware/auth.js:
+
+const jwt = require('jsonwebtoken');
+
+function auth(requiredRoles = []) {
+  return (req, res, next) => {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Missing token' });
+
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = payload;
+      if (requiredRoles.length && !requiredRoles.includes(payload.role)) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+      next();
+    } catch {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+  };
+}
+
+module.exports = auth;
+
+college-helpdesk/Help-desk-Client/index.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>College Help Desk</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>College Help Desk</h1>
+    <nav>
+      <button id="loginBtn">Login</button>
+      <button id="registerBtn">Register</button>
+    </nav>
+  </header>
+
+  <div id="authModal" class="card" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); max-width:500px; z-index:1000;">
+  <h3 id="authTitle">Login</h3>
+  <form id="authForm">
+    <label>Email <input type="email" name="email" required /></label>
+    <label>Password <input type="password" name="password" required minlength="6" /></label>
+    <div id="registerFields" style="display:none;">
+      <label>Name <input type="text" name="name" /></label>
+      <label>Role
+        <select name="role">
+          <option value="student">Student</option>
+          <option value="staff">Staff</option>
+          <option value="admin">Admin</option>
+        </select>
+      </label>
+    </div>
+    <button type="submit">Submit</button>
+    <button type="button" id="closeAuth">Close</button>
+    <div id="authMsg" class="notice"></div>
+  </form>
+</div>
+
+<script type="module">
+  import { initTickets } from './js/tickets.js';
+  import { login, register, loadAuth, getAuth, logout } from './js/auth.js';
+
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const authModal = document.getElementById('authModal');
+  const authTitle = document.getElementById('authTitle');
+  const authForm = document.getElementById('authForm');
+  const registerFields = document.getElementById('registerFields');
+  const closeAuth = document.getElementById('closeAuth');
+  const authMsg = document.getElementById('authMsg');
+
+  loadAuth();
+
+  function openModal(mode) {
+    authModal.style.display = 'block';
+    authMsg.textContent = '';
+    if (mode === 'login') {
+      authTitle.textContent = 'Login';
+      registerFields.style.display = 'none';
+      authForm.dataset.mode = 'login';
+    } else {
+      authTitle.textContent = 'Register';
+      registerFields.style.display = 'block';
+      authForm.dataset.mode = 'register';
+    }
+  }
+
+  loginBtn.addEventListener('click', () => openModal('login'));
+  registerBtn.addEventListener('click', () => openModal('register'));
+  closeAuth.addEventListener('click', () => (authModal.style.display = 'none'));
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(authForm);
+    const mode = authForm.dataset.mode;
+    try {
+      if (mode === 'login') {
+        await login(form.get('email'), form.get('password'));
+        authMsg.textContent = 'Logged in.';
+      } else {
+        await register({
+          name: form.get('name'),
+          email: form.get('email'),
+          password: form.get('password'),
+          role: form.get('role'),
+        });
+        authMsg.textContent = 'Registered. Now log in.';
+      }
+      authModal.style.display = 'none';
+      await initTickets();
+    } catch (err) {
+      authMsg.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Optional: show current user and logout
+  const header = document.querySelector('header nav');
+  const userBadge = document.createElement('span');
+  userBadge.style.marginLeft = '12px';
+  header.appendChild(userBadge);
+
+  function refreshUserBadge() {
+    const auth = getAuth();
+    if (auth?.user) {
+      userBadge.textContent = `${auth.user.name} (${auth.user.role})`;
+      const outBtn = document.createElement('button');
+      outBtn.textContent = 'Logout';
+      outBtn.addEventListener('click', async () => {
+        logout();
+        userBadge.textContent = '';
+        await initTickets();
+      });
+      header.appendChild(outBtn);
+    } else {
+      userBadge.textContent = '';
+    }
+  }
+
+  refreshUserBadge();
+  await initTickets();
+</script>
+ 
+  <main>
+    <section class="card">
+      <h2>Submit a ticket</h2>
+      <form id="ticketForm">
+        <label>Title <input type="text" name="title" required minlength="5" /></label>
+        <label>Category
+          <select name="category" required>
+            <option value="academics">Academics</option>
+            <option value="finance">Finance</option>
+            <option value="hostel">Hostel</option>
+            <option value="it">IT</option>
+          </select>
+        </label>
+        <label>Priority
+          <select name="priority">
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </label>
+        <label>Description
+          <textarea name="description" required minlength="10"></textarea>
+        </label>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="ticketResult" class="notice"></div>
+    </section>
+
+    <section class="card">
+      <h2>Your tickets</h2>
+      <div id="ticketsList"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/tickets.js"></script>
+</body>
+</html>
+
+college-helpdesk/Help-desk-Client/dashboard.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Help Desk Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Dashboard</h1>
+    <nav>
+      <a href="index.html">Submit Ticket</a>
+    </nav>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Tickets</h2>
+      <div id="filters">
+        <label>Status
+          <select id="statusFilter">
+            <option value="">All</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </label>
+        <label>Category
+          <select id="categoryFilter">
+            <option value="">All</option>
+            <option value="academics">Academics</option>
+            <option value="finance">Finance</option>
+            <option value="hostel">Hostel</option>
+            <option value="it">IT</option>
+          </select>
+        </label>
+        <button id="applyFilters">Apply</button>
+      </div>
+      <div id="ticketsList"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { api } from './js/api.js';
+    import { loadAuth, getAuth } from './js/auth.js';
+
+    const ticketsListEl = document.getElementById('ticketsList');
+    const statusFilter = document.getElementById('statusFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const applyFilters = document.getElementById('applyFilters');
+
+    loadAuth();
+
+    async function loadTickets() {
+      const { token } = getAuth();
+      if (!token) {
+        ticketsListEl.innerHTML = '<p class="notice">Please log in.</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      if (statusFilter.value) params.append('status', statusFilter.value);
+      if (categoryFilter.value) params.append('category', categoryFilter.value);
+
+      try {
+        const tickets = await api(`/tickets?${params.toString()}`, { token });
+        ticketsListEl.innerHTML = tickets
+          .map(
+            (t) => `
+          <div class="ticket">
+            <div><strong>${t.title}</strong></div>
+            <div class="meta">#${t.id} • ${t.category} • ${t.status} • ${new Date(t.created_at).toLocaleString()}</div>
+            <button data-id="${t.id}" class="viewBtn">View</button>
+          </div>`
+          )
+          .join('');
+        document.querySelectorAll('.viewBtn').forEach((b) =>
+          b.addEventListener('click', () => (window.location.href = `admin.html?ticket=${b.dataset.id}`))
+        );
+      } catch (e) {
+        ticketsListEl.innerHTML = `<p class="notice">Error: ${e.message}</p>`;
+      }
+    }
+
+    applyFilters.addEventListener('click', loadTickets);
+    await loadTickets();
+  </script>
+</body>
+</html>
+
+college-helpdesk/Help-desk-Client/admin.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ticket Detail</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Ticket Detail</h1>
+    <nav>
+      <a href="dashboard.html">Back to Dashboard</a>
+    </nav>
+  </header>
+  <main>
+    <section class="card">
+      <div id="ticketHeader"></div>
+      <div id="messagesBox" style="max-height: 350px; overflow:auto; border:1px solid #1f2937; padding:8px; border-radius:8px;"></div>
+
+      <form id="statusForm" style="margin-top:10px;">
+        <label>Update status
+          <select name="status">
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </label>
+        <button type="submit">Update</button>
+        <span id="statusMsg" class="notice"></span>
+      </form>
+
+      <form id="replyForm" style="margin-top:10px;">
+        <textarea name="message" required minlength="2" placeholder="Write a reply..."></textarea>
+        <button type="submit">Send</button>
+        <span id="replyMsg" class="notice"></span>
+      </form>
+    </section>
+  </main>
+
+  <script type="module">
+    import { api } from './js/api.js';
+    import { loadAuth, getAuth, requireRole } from './js/auth.js';
+
+    loadAuth();
+    if (!requireRole(['staff','admin','student'])) {
+      alert('Please log in.');
+      window.location.href = 'index.html';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get('ticket');
+    const ticketHeader = document.getElementById('ticketHeader');
+    const messagesBox = document.getElementById('messagesBox');
+    const statusForm = document.getElementById('statusForm');
+    const statusMsg = document.getElementById('statusMsg');
+    const replyForm = document.getElementById('replyForm');
+    const replyMsg = document.getElementById('replyMsg');
+
+    async function loadTicket() {
+      const { token, user } = getAuth();
+      try {
+        const data = await api(`/tickets/${ticketId}`, { token });
+        ticketHeader.innerHTML = `
+          <h2>#${data.ticket.id} — ${data.ticket.title}</h2>
+          <p class="meta">Category: ${data.ticket.category} • Status: ${data.ticket.status} • Student ID: ${data.ticket.student_id}</p>
+          <p>${data.ticket.description}</p>
+        `;
+        messagesBox.innerHTML = data.messages
+          .map(
+            (m) => `
+          <div style="margin-bottom:8px;">
+            <strong>${m.author_name} (${m.author_role})</strong>
+            <div>${m.message}</div>
+            <div class="meta">${new Date(m.created_at).toLocaleString()}</div>
+          </div>`
+          )
+          .join('');
+
+        // Only staff/admin can update status
+        statusForm.style.display = requireRole(['staff','admin']) ? 'block' : 'none';
+      } catch (e) {
+        ticketHeader.innerHTML = `<p class="notice">Error: ${e.message}</p>`;
+      }
+    }
+
+    statusForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { token } = getAuth();
+      const status = new FormData(statusForm).get('status');
+      try {
+        await api(`/tickets/${ticketId}/status`, { method: 'PATCH', body: { status }, token });
+        statusMsg.textContent = 'Status updated.';
+        await loadTicket();
+      } catch (err) {
+        statusMsg.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    replyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { token } = getAuth();
+      const message = new FormData(replyForm).get('message');
+      try {
+        await api(`/tickets/${ticketId}/messages`, { method: 'POST', body: { message }, token });
+        replyMsg.textContent = 'Message sent.';
+        replyForm.reset();
+        await loadTicket();
+      } catch (err) {
+        replyMsg.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    await loadTicket();
+  </script>
+</body>
+</html>
+
+college-helpdesk/Help-desk-Client/css/styles.css:
+
+:root {
+  --bg: #0f172a;
+  --card: #111827;
+  --text: #e5e7eb;
+  --accent: #22d3ee;
+  --muted: #9ca3af;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+}
+header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #1f2937; }
+nav button { margin-left: 8px; background: var(--card); color: var(--text); border: 1px solid #1f2937; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+.card { background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #1f2937; }
+label { display: block; margin-bottom: 12px; }
+input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #374151; background: #0b1220; color: var(--text); }
+button[type="submit"] { background: var(--accent); color: #0b1220; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.notice { margin-top: 10px; color: var(--muted); }
+.ticket { padding: 10px; border: 1px solid #1f2937; border-radius: 8px; margin-bottom: 8px; }
+.ticket .meta { color: var(--muted); font-size: 0.9rem; }
+
+college-helpdesk/Help-desk-Client/js/api.js:
+
+const API_BASE = 'http://localhost:4000/api';
+
+export async function api(path, { method = 'GET', body, token } = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+college-helpdesk/Help-desk-Client/js/tickets.js:
+
+import { api } from './api.js';
+import { getAuth } from './auth.js';
+
+const ticketsListEl = document.getElementById('ticketsList');
+const ticketForm = document.getElementById('ticketForm');
+const ticketResult = document.getElementById('ticketResult');
+
+async function loadTickets() {
+  const { token } = getAuth();
+  if (!token) {
+    ticketsListEl.innerHTML = '<p class="notice">Please log in to view your tickets.</p>';
+    return;
+  }
+  try {
+    const tickets = await api('/tickets', { token });
+    ticketsListEl.innerHTML = tickets
+      .map(
+        (t) => `
+        <div class="ticket">
+          <div><strong>${t.title}</strong></div>
+          <div class="meta">#${t.id} • ${t.category} • ${t.status} • Priority: ${t.priority}</div>
+          <button data-id="${t.id}" class="viewTicketBtn">View</button>
+        </div>`
+      )
+      .join('');
+    bindViewButtons();
+  } catch (e) {
+    ticketsListEl.innerHTML = `<p class="notice">Error loading tickets: ${e.message}</p>`;
+  }
+}
+
+function bindViewButtons() {
+  document.querySelectorAll('.viewTicketBtn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      await openTicketModal(id);
+    });
+  });
+}
+
+async function openTicketModal(id) {
+  const { token } = getAuth();
+  try {
+    const data = await api(`/tickets/${id}`, { token });
+    const modal = document.createElement('div');
+    modal.className = 'card';
+    modal.style.position = 'fixed';
+    modal.style.top = '10%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translateX(-50%)';
+    modal.style.maxWidth = '700px';
+    modal.style.zIndex = '1000';
+
+    modal.innerHTML = `
+      <h3>Ticket #${data.ticket.id}: ${data.ticket.title}</h3>
+      <p class="meta">${data.ticket.category} • ${data.ticket.status}</p>
+      <div style="max-height: 300px; overflow:auto; border:1px solid #1f2937; padding:8px; border-radius:8px;">
+        ${data.messages
+          .map(
+            (m) => `
+          <div style="margin-bottom:8px;">
+            <strong>${m.author_name} (${m.author_role})</strong>
+            <div>${m.message}</div>
+            <div class="meta">${new Date(m.created_at).toLocaleString()}</div>
+          </div>`
+          )
+          .join('')}
+      </div>
+      <form id="replyForm" style="margin-top:10px;">
+        <textarea name="message" required minlength="2" placeholder="Write a reply..."></textarea>
+        <button type="submit">Send</button>
+        <button type="button" id="closeModal">Close</button>
+      </form>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#closeModal').addEventListener('click', () => modal.remove());
+
+    modal.querySelector('#replyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = e.target.message.value.trim();
+      if (!message) return;
+      try {
+        await api(`/tickets/${id}/messages`, { method: 'POST', body: { message }, token });
+        modal.remove();
+        await loadTickets();
+      } catch (err) {
+        alert('Failed to send message: ' + err.message);
+      }
+    });
+  } catch (e) {
+    alert('Failed to load ticket: ' + e.message);
+  }
+}
+
+if (ticketForm) {
+  ticketForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(ticketForm);
+    const payload = {
+      title: form.get('title'),
+      category: form.get('category'),
+      priority: form.get('priority'),
+      description: form.get('description'),
+    };
+    const { token } = getAuth();
+    if (!token) {
+      ticketResult.textContent = 'Please log in first.';
+      return;
+    }
+    try {
+      const created = await api('/tickets', { method: 'POST', body: payload, token });
+      ticketResult.textContent = `Ticket #${created.id} created.`;
+      ticketForm.reset();
+      await loadTickets();
+    } catch (err) {
+      ticketResult.textContent = 'Error: ' + err.message;
+    }
+  });
+}
+
+export async function initTickets() {
+  await loadTickets();
+}
+
+college-helpdesk/Help-desk-Client/js/auth.js:
+
+import { api } from './api.js';
+
+let authState = { token: null, user: null };
+
+export function getAuth() {
+  return authState;
+}
+
+export function setAuth(state) {
+  authState = state;
+  if (state?.token) {
+    localStorage.setItem('helpdesk_auth', JSON.stringify(state));
+  } else {
+    localStorage.removeItem('helpdesk_auth');
+  }
+}
+
+export function loadAuth() {
+  const raw = localStorage.getItem('helpdesk_auth');
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    authState = parsed;
+  } catch {
+    // ignore
+  }
+}
+
+export async function register({ name, email, password, role = 'student' }) {
+  const user = await api('/users/register', { method: 'POST', body: { name, email, password, role } });
+  return user;
+}
+
+export async function login(email, password) {
+  const data = await api('/users/login', { method: 'POST', body: { email, password } });
+  setAuth({ token: data.token, user: data.user });
+  return data.user;
+}
+
+export function logout() {
+  setAuth({ token: null, user: null });
+}
+
+export function requireRole(roles = []) {
+  const user = authState.user;
+  if (!user) return false;
+  if (!roles.length) return true;
+  return roles.includes(user.role);
+}
