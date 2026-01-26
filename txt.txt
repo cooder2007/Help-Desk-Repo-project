@@ -4,9 +4,13 @@ college-helpdesk/
 ├─ Help-Desk-server/
 │  ├─ src/
 │  │  ├─ app.js
+|  ├─ chatbot/
+│  │  ├─ chatbot.js        
+│  │  ├─ intents.json 
 │  │  ├─ routes/
 │  │  │  ├─ tickets.js
 │  │  │  ├─ users.js
+│  │  │  ├─ chatbot.js
 │  │  ├─ db/
 │  │  │  ├─ pool.js
 │  │  ├─ middleware/
@@ -26,6 +30,7 @@ college-helpdesk/
 │  │  ├─ api.js
 │  │  ├─ tickets.js
 │  │  ├─ auth.js
+│  │  ├─ chatbot.js
 ├─ docs/
 │  ├─ README.md
 

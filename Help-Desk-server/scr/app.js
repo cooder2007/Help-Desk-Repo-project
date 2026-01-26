@@ -19,3 +19,6 @@ app.use('/api/tickets', ticketsRouter);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
+
+const chatbotRouter = require('./routes/chatbot');
+app.use('/api/chatbot', chatbotRouter);

@@ -1,0 +1,18 @@
+{
+  "greetings": {
+    "patterns": ["hi", "hello", "hey"],
+    "response": "Hello 👋 I’m your Help Desk Assistant. How can I help you today?"
+  },
+  "it_issue": {
+    "patterns": ["wifi", "internet", "login", "password", "pc", "laptop"],
+    "response": "It looks like an IT issue. I can help you create an IT support ticket."
+  },
+  "hostel_issue": {
+    "patterns": ["room", "hostel", "water", "electricity", "fan"],
+    "response": "This seems like a hostel-related issue. Would you like me to create a hostel ticket?"
+  },
+  "finance_issue": {
+    "patterns": ["fees", "refund", "payment", "scholarship"],
+    "response": "This sounds like a finance issue. I can help you raise a finance ticket."
+  }
+}

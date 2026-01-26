@@ -38,6 +38,8 @@
 <script type="module">
   import { initTickets } from './js/tickets.js';
   import { login, register, loadAuth, getAuth, logout } from './js/auth.js';
+  import { initChatbot } from './js/chatbot.js';
+  initChatbot();
 
   const loginBtn = document.getElementById('loginBtn');
   const registerBtn = document.getElementById('registerBtn');
