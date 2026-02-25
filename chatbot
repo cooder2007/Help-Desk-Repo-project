@@ -1,0 +1,17 @@
+from chatterbot import ChatBot
+from chatterbot.trainers import ListTrainer
+import pandas as pd
+p=pd.read_csv("christ_university_ncr_qa_completed.csv",encoding="cp1252")
+q=p["Question"]
+a=p["Answer"]
+bot=ChatBot("Christite")
+tra=ListTrainer(bot)
+for qa,an in zip(q,a):
+    tra.train([qa,an])
+while(True):
+    s=input("Enter :")
+    if(s=="no"):
+        break
+    else: 
+        b=bot.get_response(s)
+        print(b)
