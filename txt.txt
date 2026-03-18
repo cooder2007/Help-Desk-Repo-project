@@ -1,67 +1,99 @@
-This is the proper file structure for now:
-
 college-helpdesk/
 ├─ Help-Desk-server/
 │  ├─ src/
 │  │  ├─ app.js
-|  ├─ chatbot/
-│  │  ├─ chatbot.js        
-│  │  ├─ intents.json 
+│  │
 │  │  ├─ routes/
 │  │  │  ├─ tickets.js
 │  │  │  ├─ users.js
 │  │  │  ├─ chatbot.js
-│  │  ├─ db/
-│  │  │  ├─ pool.js
-│  │  ├─ middleware/
-│  │  │  ├─ auth.js
+│  │
 │  │  ├─ controllers/
 │  │  │  ├─ ticketsController.js
 │  │  │  ├─ usersController.js
+│  │
+│  │  ├─ db/
+│  │  │  ├─ pool.js
+│  │
+│  │  ├─ middleware/
+│  │  │  ├─ auth.js
+│  │
+│  │  ├─ chatbot/
+│  │  │  ├─ chatbot.js
+│  │  │  ├─ intents.json
+│
 │  ├─ package.json
+│  ├─ package-lock.json
 │  ├─ .env
-├─ Help-desk-Client/
+│
+├─ Help-Desk-client/
 │  ├─ index.html
 │  ├─ dashboard.html
 │  ├─ admin.html
+│
 │  ├─ css/
 │  │  ├─ styles.css
+│
 │  ├─ js/
 │  │  ├─ api.js
 │  │  ├─ tickets.js
 │  │  ├─ auth.js
 │  │  ├─ chatbot.js
+│
 ├─ docs/
 │  ├─ README.md
 
-All code files are available in a single ".txt" file. If a user is required to use any AI, they should not search and copy-paste every code snippet repeatedly.
-Files not mentioned are either unavailable or too large to upload, such as the note.js package.
 
-college-helpdesk/Help-Desk-server/src/app.js:
+
+
+
+#################college-helpdesk/Help-Desk-server/src/app.js:
 
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const ticketsRouter = require('./routes/tickets');
 const usersRouter = require('./routes/users');
+const ticketsRouter = require('./routes/tickets');
+const chatbotRouter = require('./routes/chatbot');
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 app.use('/api/users', usersRouter);
 app.use('/api/tickets', ticketsRouter);
+app.use('/api/chatbot', chatbotRouter);
 
-const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
 
-college-helpdesk/Help-Desk-server/src/routes/tickets.js:
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+console.log("Tickets router:", ticketsRouter);
+console.log("Chatbot router:", chatbotRouter);
+
+#################college-helpdesk/Help-Desk-server/src/routes/tickets.js:
 
 const express = require('express');
 const { body, validationResult } = require('express-validator');
@@ -70,7 +102,48 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Create ticket (student)
+router.get('/', auth(['student','staff','admin']), async (req, res) => {
+  try {
+    const role = req.user.role;
+    const { status, category } = req.query;
+
+    let base = `
+      SELECT t.*, u.name AS student_name 
+      FROM tickets t 
+      JOIN users u ON u.id = t.student_id
+    `;
+
+    const params = [];
+    const where = [];
+
+    if (role === 'student') {
+      where.push(`t.student_id = $${params.length + 1}`);
+      params.push(req.user.id);
+    }
+
+    if (status) {
+      where.push(`t.status = $${params.length + 1}`);
+      params.push(status);
+    }
+
+    if (category) {
+      where.push(`t.category = $${params.length + 1}`);
+      params.push(category);
+    }
+
+    const query = where.length
+      ? `${base} WHERE ${where.join(' AND ')} ORDER BY t.created_at DESC`
+      : `${base} ORDER BY t.created_at DESC`;
+
+    const { rows } = await pool.query(query, params);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch tickets' });
+  }
+});
+
 router.post(
   '/',
   auth(['student']),
@@ -81,111 +154,48 @@ router.post(
     body('priority').optional().isIn(['low','normal','high','urgent']),
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
 
-    const { title, description, category, priority = 'normal' } = req.body;
-    const { rows } = await pool.query(
-      `INSERT INTO tickets (student_id, title, description, category, priority)
-       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [req.user.id, title, description, category, priority]
-    );
-    res.status(201).json(rows[0]);
+      const { title, description, category, priority = 'normal' } = req.body;
+
+      const { rows } = await pool.query(
+        `INSERT INTO tickets (student_id, title, description, category, priority)
+         VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+        [req.user.id, title, description, category, priority]
+      );
+
+      res.status(201).json(rows[0]);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Ticket creation failed' });
+    }
   }
 );
 
-// List tickets (student sees own; staff/admin see all)
-router.get('/', auth(['student','staff','admin']), async (req, res) => {
-  const role = req.user.role;
-  const { status, category } = req.query;
-
-  let base = 'SELECT t.*, u.name AS student_name FROM tickets t JOIN users u ON u.id=t.student_id';
-  const params = [];
-  const where = [];
-
-  if (role === 'student') {
-    where.push('t.student_id=$' + (params.length + 1));
-    params.push(req.user.id);
-  }
-  if (status) {
-    where.push('t.status=$' + (params.length + 1));
-    params.push(status);
-  }
-  if (category) {
-    where.push('t.category=$' + (params.length + 1));
-    params.push(category);
-  }
-
-  const sql = where.length ? `${base} WHERE ${where.join(' AND ')} ORDER BY t.created_at DESC`
-                           : `${base} ORDER BY t.created_at DESC`;
-
-  const { rows } = await pool.query(sql, params);
-  res.json(rows);
-});
-
-// Get single ticket + messages
 router.get('/:id', auth(['student','staff','admin']), async (req, res) => {
-  const ticketId = Number(req.params.id);
-  const { rows: trows } = await pool.query('SELECT * FROM tickets WHERE id=$1', [ticketId]);
-  const ticket = trows[0];
-  if (!ticket) return res.status(404).json({ error: 'Not found' });
+  try {
+    const ticketId = Number(req.params.id);
 
-  if (req.user.role === 'student' && ticket.student_id !== req.user.id) {
-    return res.status(403).json({ error: 'Forbidden' });
+    const { rows } = await pool.query(
+      'SELECT * FROM tickets WHERE id=$1',
+      [ticketId]
+    );
+
+    if (!rows[0]) return res.status(404).json({ error: 'Ticket not found' });
+
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching ticket' });
   }
-
-  const { rows: mrows } = await pool.query(
-    `SELECT tm.*, u.name AS author_name, u.role AS author_role
-     FROM ticket_messages tm JOIN users u ON u.id=tm.author_id
-     WHERE tm.ticket_id=$1 ORDER BY tm.created_at ASC`,
-    [ticketId]
-  );
-
-  res.json({ ticket, messages: mrows });
-});
-
-// Add message (student or staff)
-router.post('/:id/messages', auth(['student','staff','admin']), [body('message').isLength({ min: 2 })], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-  const ticketId = Number(req.params.id);
-  const { rows: trows } = await pool.query('SELECT * FROM tickets WHERE id=$1', [ticketId]);
-  const ticket = trows[0];
-  if (!ticket) return res.status(404).json({ error: 'Not found' });
-
-  if (req.user.role === 'student' && ticket.student_id !== req.user.id) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
-  const { rows } = await pool.query(
-    'INSERT INTO ticket_messages (ticket_id, author_id, message) VALUES ($1,$2,$3) RETURNING *',
-    [ticketId, req.user.id, req.body.message]
-  );
-
-  // Update ticket timestamp
-  await pool.query('UPDATE tickets SET updated_at=NOW() WHERE id=$1', [ticketId]);
-
-  res.status(201).json(rows[0]);
-});
-
-// Update status (staff/admin)
-router.patch('/:id/status', auth(['staff','admin']), [body('status').isIn(['open','in_progress','resolved','closed'])], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-  const ticketId = Number(req.params.id);
-  const { rows } = await pool.query('UPDATE tickets SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING *', [
-    req.body.status,
-    ticketId,
-  ]);
-  if (!rows[0]) return res.status(404).json({ error: 'Not found' });
-  res.json(rows[0]);
 });
 
 module.exports = router;
 
-college-helpdesk/Help-Desk-server/src/routes/users.js:
+#################college-helpdesk/Help-Desk-server/src/routes/users.js:
 
 const express = require('express');
 const bcrypt = require('bcrypt');
@@ -195,7 +205,6 @@ const pool = require('../db/pool');
 
 const router = express.Router();
 
-// Register
 router.post(
   '/register',
   [
@@ -224,7 +233,6 @@ router.post(
   }
 );
 
-// Login
 router.post('/login', [body('email').isEmail(), body('password').notEmpty()], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -243,7 +251,120 @@ router.post('/login', [body('email').isEmail(), body('password').notEmpty()], as
 
 module.exports = router;
 
-college-helpdesk/Help-Desk-server/src/db/pool.js:
+#################college-helpdesk/Help-Desk-server/src/routes/chatbot.js:
+
+const express = require('express');
+const auth = require('../middleware/auth');
+const { detectIntent } = require('../../chatbot/chatbot');
+
+const router = express.Router();
+
+
+router.get('/', (req, res) => {
+  res.json({ message: 'Chatbot route working' });
+});
+
+
+router.post('/', auth(['student','staff','admin']), (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const reply = detectIntent(message);
+
+    res.json({ reply });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Chatbot failed' });
+  }
+});
+
+module.exports = router;
+
+#################college-helpdesk/Help-Desk-server/src/controllers/ticketsController.js:
+
+const pool = require('../db/pool');
+
+exports.getTicketById = async (req, res) => {
+  try {
+    const ticketId = Number(req.params.id);
+
+    const ticketRes = await pool.query(
+      'SELECT * FROM tickets WHERE id=$1',
+      [ticketId]
+    );
+
+    if (!ticketRes.rows[0]) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    const messagesRes = await pool.query(
+      `SELECT tm.*, u.name AS author_name, u.role AS author_role
+       FROM ticket_messages tm
+       JOIN users u ON u.id = tm.author_id
+       WHERE tm.ticket_id=$1
+       ORDER BY tm.created_at ASC`,
+      [ticketId]
+    );
+
+    res.json({
+      ticket: ticketRes.rows[0],
+      messages: messagesRes.rows
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching ticket' });
+  }
+};
+
+
+exports.addMessage = async (req, res) => {
+  try {
+    const ticketId = Number(req.params.id);
+    const { message } = req.body;
+
+    const { rows } = await pool.query(
+      `INSERT INTO ticket_messages (ticket_id, author_id, message)
+       VALUES ($1,$2,$3) RETURNING *`,
+      [ticketId, req.user.id, message]
+    );
+
+    res.status(201).json(rows[0]);
+
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+};
+
+
+exports.updateStatus = async (req, res) => {
+  try {
+    const ticketId = Number(req.params.id);
+    const { status } = req.body;
+
+    await pool.query(
+      `UPDATE tickets SET status=$1, updated_at=NOW() WHERE id=$2`,
+      [status, ticketId]
+    );
+
+    res.json({ message: 'Status updated' });
+
+  } catch (err) {
+    res.status(500).json({ error: 'Status update failed' });
+  }
+};
+
+#################college-helpdesk/Help-Desk-server/src/controllers/usersController.js:
+
+
+exports.getProfile = (req, res) => {
+  res.json(req.user);
+};
+
+#################college-helpdesk/Help-Desk-server/src/db/pool.js:
 
 const { Pool } = require('pg');
 require('dotenv').config();
@@ -258,32 +379,125 @@ const pool = new Pool({
 
 module.exports = pool;
 
-college-helpdesk/Help-Desk-server/src/middleware/auth.js:
+#################college-helpdesk/Help-Desk-server/src/middleware/auth.js:
 
 const jwt = require('jsonwebtoken');
 
 function auth(requiredRoles = []) {
   return (req, res, next) => {
-    const header = req.headers.authorization || '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-    if (!token) return res.status(401).json({ error: 'Missing token' });
-
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = payload;
-      if (requiredRoles.length && !requiredRoles.includes(payload.role)) {
-        return res.status(403).json({ error: 'Forbidden' });
+      const header = req.headers.authorization || '';
+
+      if (!header.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authorization token missing' });
       }
+
+      const token = header.split(' ')[1];
+
+      if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET not defined');
+      }
+
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+      req.user = payload;
+
+      if (requiredRoles.length && !requiredRoles.includes(payload.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
       next();
-    } catch {
-      return res.status(401).json({ error: 'Invalid token' });
+    } catch (err) {
+      console.error('Auth Error:', err.message);
+      return res.status(401).json({ error: 'Invalid or expired token' });
     }
   };
 }
 
 module.exports = auth;
 
-college-helpdesk/Help-desk-Client/index.html:
+#################college-helpdesk/Help-Desk-server/src/chatbot/chatbot.js:
+
+const intents = require('./intents.json');
+
+function detectIntent(message) {
+  const text = message.toLowerCase();
+
+  for (const key in intents) {
+    for (const pattern of intents[key].patterns) {
+      if (text.includes(pattern)) {
+        return intents[key].response;
+      }
+    }
+  }
+
+  return "I'm not fully sure 🤔. You can explain your issue or create a ticket directly.";
+}
+
+module.exports = { detectIntent };
+
+#################college-helpdesk/Help-Desk-server/src/chatbot/intents.json:
+
+{
+  "greetings": {
+    "patterns": ["hi", "hello", "hey"],
+    "response": "Hello 👋 I’m your Help Desk Assistant. How can I help you today?"
+  },
+  "it_issue": {
+    "patterns": ["wifi", "internet", "login", "password", "pc", "laptop"],
+    "response": "It looks like an IT issue. I can help you create an IT support ticket."
+  },
+  "hostel_issue": {
+    "patterns": ["room", "hostel", "water", "electricity", "fan"],
+    "response": "This seems like a hostel-related issue. Would you like me to create a hostel ticket?"
+  },
+  "finance_issue": {
+    "patterns": ["fees", "refund", "payment", "scholarship"],
+    "response": "This sounds like a finance issue. I can help you raise a finance ticket."
+  }
+}
+
+#################college-helpdesk/Help-Desk-server/package.json:
+
+{
+  "name": "college-helpdesk-server",
+  "version": "1.0.0",
+  "description": "College Help Desk Backend",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.6",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.1",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
+
+#################college-helpdesk/Help-Desk-server/.env:
+
+PORT=4000
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=YOUR_PASSWORD   <-- same one you used in psql
+DB_NAME=college_helpdesk
+
+JWT_SECRET=supersecretkey
+CORS_ORIGIN=http://127.0.0.1:5500
+
+#################college-helpdesk/Help-Desk-client/index.html:
 
 <!DOCTYPE html>
 <html lang="en">
@@ -325,6 +539,8 @@ college-helpdesk/Help-desk-Client/index.html:
 <script type="module">
   import { initTickets } from './js/tickets.js';
   import { login, register, loadAuth, getAuth, logout } from './js/auth.js';
+  import { initChatbot } from './js/chatbot.js';
+  initChatbot();
 
   const loginBtn = document.getElementById('loginBtn');
   const registerBtn = document.getElementById('registerBtn');
@@ -379,7 +595,6 @@ college-helpdesk/Help-desk-Client/index.html:
     }
   });
 
-  // Optional: show current user and logout
   const header = document.querySelector('header nav');
   const userBadge = document.createElement('span');
   userBadge.style.marginLeft = '12px';
@@ -447,7 +662,7 @@ college-helpdesk/Help-desk-Client/index.html:
 </body>
 </html>
 
-college-helpdesk/Help-desk-Client/dashboard.html:
+#################college-helpdesk/Help-Desk-client/dashboard.html:
 
 <!DOCTYPE html>
 <html lang="en">
@@ -538,7 +753,7 @@ college-helpdesk/Help-desk-Client/dashboard.html:
 </body>
 </html>
 
-college-helpdesk/Help-desk-Client/admin.html:
+#################college-helpdesk/Help-Desk-client/admin.html:
 
 <!DOCTYPE html>
 <html lang="en">
@@ -658,7 +873,7 @@ college-helpdesk/Help-desk-Client/admin.html:
 </body>
 </html>
 
-college-helpdesk/Help-desk-Client/css/styles.css:
+#################college-helpdesk/Help-Desk-client/css/styles.css:
 
 :root {
   --bg: #0f172a;
@@ -682,7 +897,7 @@ button[type="submit"] { background: var(--accent); color: #0b1220; border: none;
 .ticket { padding: 10px; border: 1px solid #1f2937; border-radius: 8px; margin-bottom: 8px; }
 .ticket .meta { color: var(--muted); font-size: 0.9rem; }
 
-college-helpdesk/Help-desk-Client/js/api.js:
+#################college-helpdesk/Help-Desk-client/js/api.js:
 
 const API_BASE = 'http://localhost:4000/api';
 
@@ -701,7 +916,7 @@ export async function api(path, { method = 'GET', body, token } = {}) {
   return data;
 }
 
-college-helpdesk/Help-desk-Client/js/tickets.js:
+#################college-helpdesk/Help-Desk-client/js/tickets.js:
 
 import { api } from './api.js';
 import { getAuth } from './auth.js';
@@ -829,7 +1044,7 @@ export async function initTickets() {
   await loadTickets();
 }
 
-college-helpdesk/Help-desk-Client/js/auth.js:
+#################college-helpdesk/Help-Desk-client/js/auth.js:
 
 import { api } from './api.js';
 
@@ -880,3 +1095,65 @@ export function requireRole(roles = []) {
   if (!roles.length) return true;
   return roles.includes(user.role);
 }
+
+#################college-helpdesk/Help-Desk-client/js/chatbot.js:
+
+import { api } from './api.js';
+import { getAuth } from './auth.js';
+
+export function initChatbot() {
+  const box = document.createElement('div');
+  box.className = 'card';
+  box.innerHTML = `
+    <h3>🤖 Help Desk Bot</h3>
+    <div id="chatLog" style="height:200px; overflow:auto; border:1px solid #1f2937; padding:8px;"></div>
+    <input id="chatInput" placeholder="Ask me something..." />
+  `;
+  document.body.appendChild(box);
+
+  const log = box.querySelector('#chatLog');
+  const input = box.querySelector('#chatInput');
+
+  input.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter' && input.value.trim()) {
+      const msg = input.value;
+      input.value = '';
+      log.innerHTML += `<div><strong>You:</strong> ${msg}</div>`;
+
+      const { token } = getAuth();
+      const res = await api('/chatbot', {
+        method: 'POST',
+        token,
+        body: { message: msg }
+      });
+
+      log.innerHTML += `<div><strong>Bot:</strong> ${res.reply}</div>`;
+      log.scrollTop = log.scrollHeight;
+    }
+  });
+}
+
+Backend Database using Postegrelsql :
+CREATE TABLE users ( id SERIAL PRIMARY KEY,  name TEXT NOT NULL,  email TEXT UNIQUE NOT NULL,  role TEXT CHECK (role IN('student','staff','admin')) NOT NULL,  password_hash TEXT NOT NULL,  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+-- TICKETS
+CREATE TABLE tickets (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  category TEXT CHECK (category IN ('academics','finance','hostel','it')),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low','normal','high','urgent')),
+  status TEXT DEFAULT 'open' CHECK (status IN ('open','in_progress','resolved','closed')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- MESSAGES
+CREATE TABLE ticket_messages (
+  id SERIAL PRIMARY KEY,
+  ticket_id INTEGER REFERENCES tickets(id) ON DELETE CASCADE,
+  author_id INTEGER REFERENCES users(id),
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
