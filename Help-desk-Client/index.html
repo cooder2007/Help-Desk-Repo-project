@@ -36,6 +36,8 @@
 </div>
 
 <script type="module">
+  import { initBackgroundAnimation } from './js/animations.js';
+  initBackgroundAnimation();
   import { initTickets } from './js/tickets.js';
   import { login, register, loadAuth, getAuth, logout } from './js/auth.js';
   import { initChatbot } from './js/chatbot.js';
@@ -94,7 +96,6 @@
     }
   });
 
-  // Optional: show current user and logout
   const header = document.querySelector('header nav');
   const userBadge = document.createElement('span');
   userBadge.style.marginLeft = '12px';
@@ -120,7 +121,20 @@
   refreshUserBadge();
   await initTickets();
 </script>
- 
+
+<script type="module">
+  import { initTickets } from './js/tickets.js';
+  import { loadAuth, getAuth } from './js/auth.js';
+
+  loadAuth();
+
+  if (!getAuth()?.token) {
+    window.location.href = 'login.html';
+  } else {
+    await initTickets();
+  }
+</script>
+
   <main>
     <section class="card">
       <h2>Submit a ticket</h2>
