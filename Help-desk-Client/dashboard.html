@@ -41,6 +41,8 @@
   </main>
 
   <script type="module">
+    import { initBackgroundAnimation } from './js/animations.js';
+    initBackgroundAnimation();
     import { api } from './js/api.js';
     import { loadAuth, getAuth } from './js/auth.js';
 
@@ -84,5 +86,7 @@
     applyFilters.addEventListener('click', loadTickets);
     await loadTickets();
   </script>
+
+  
 </body>
 </html>
