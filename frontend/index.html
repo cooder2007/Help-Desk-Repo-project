@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Christ University — Help Desk · NCR Campus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"/>
+<style>
+/* ============================================================
+   DESIGN SYSTEM
+============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+:root{
+  --bg:#020810;
+  --surface:#070f1e;
+  --card:#0b1629;
+  --glass:rgba(7,15,30,0.75);
+  --border:rgba(255,255,255,0.055);
+  --border-hi:rgba(255,255,255,0.11);
+  --text:#dde4f0;
+  --muted:#3d4e6a;
+  --subtle:#6e82a6;
+  --accent:#00c896;
+  --accent2:#5d5fef;
+  --accent-glow:rgba(0,200,150,0.15);
+  --danger:#f87171;
+  --warning:#fbbf24;
+  --success:#34d399;
+  --info:#60a5fa;
+  --t:.2s cubic-bezier(.4,0,.2,1);
+  --t-spring:.4s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ── Light Theme ── */
+[data-theme="light"]{
+  --bg:#eef2f8;--surface:#ffffff;--card:#f8fafc;--glass:rgba(255,255,255,0.8);
+  --border:rgba(0,0,0,0.08);--border-hi:rgba(0,0,0,0.15);
+  --text:#111827;--muted:#9ca3af;--subtle:#6b7280;
+  --accent:#0284c7;--accent2:#7c3aed;--accent-glow:rgba(2,132,199,0.12);
+}
+[data-theme="light"] body::before{
+  background:radial-gradient(ellipse 80% 60% at 20% -10%,rgba(2,132,199,.06),transparent 55%),
+             radial-gradient(ellipse 60% 50% at 80% 110%,rgba(124,58,237,.05),transparent 55%);
+}
+[data-theme="light"] body::after{
+  background-image:linear-gradient(rgba(2,132,199,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(2,132,199,.03) 1px,transparent 1px);
+}
+
+/* ── Liquid Glass ── */
+[data-theme="glass"]{
+  --bg:#c8daf7;--surface:rgba(255,255,255,0.25);--card:rgba(255,255,255,0.3);
+  --glass:rgba(255,255,255,0.35);--border:rgba(255,255,255,0.5);
+  --border-hi:rgba(255,255,255,0.7);--text:#0a1628;--muted:#506080;--subtle:#2d4a72;
+  --accent:#1d4ed8;--accent2:#7c3aed;--accent-glow:rgba(29,78,216,0.15);
+}
+[data-theme="glass"] body{background:linear-gradient(135deg,#a8c8f8 0%,#c5e8fc 50%,#d4c5fb 100%)!important}
+[data-theme="glass"] body::before,[data-theme="glass"] body::after{display:none}
+[data-theme="glass"] .auth-card,[data-theme="glass"] .card{
+  background:rgba(255,255,255,0.28)!important;
+  backdrop-filter:blur(32px)!important;
+  box-shadow:0 8px 48px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.6)!important;
+}
+
+/* ── Neo-Brutalism ── */
+[data-theme="brutalism"]{
+  --bg:#fffbf0;--surface:#ffffff;--card:#ffffff;--glass:#ffffff;
+  --border:#111111;--border-hi:#111111;--text:#111111;--muted:#666666;--subtle:#444444;
+  --accent:#e63000;--accent2:#f5c400;--accent-glow:rgba(230,48,0,0.1);
+}
+[data-theme="brutalism"] body::before,[data-theme="brutalism"] body::after{display:none}
+[data-theme="brutalism"] body{background:#fffbf0!important}
+[data-theme="brutalism"] .auth-card,[data-theme="brutalism"] .card{
+  border:3px solid #111!important;border-radius:0!important;
+  box-shadow:6px 6px 0 #111!important;backdrop-filter:none!important;
+}
+[data-theme="brutalism"] input,[data-theme="brutalism"] select{
+  border:2px solid #111!important;border-radius:0!important;
+}
+[data-theme="brutalism"] .btn-auth,[data-theme="brutalism"] .role-btn,[data-theme="brutalism"] .tab{
+  border-radius:0!important;
+}
+[data-theme="brutalism"] .btn-auth:hover{transform:translate(3px,3px)!important;box-shadow:3px 3px 0 #111!important}
+
+/* ── Dopamine ── */
+[data-theme="dopamine"]{
+  --bg:#0e0618;--surface:#1a0a30;--card:#230e40;--glass:rgba(35,14,64,0.9);
+  --border:rgba(255,0,180,0.3);--border-hi:rgba(0,240,255,0.4);
+  --text:#ffffff;--muted:#d08aff;--subtle:#e8b0ff;
+  --accent:#00f0ff;--accent2:#ff00b4;--accent-glow:rgba(0,240,255,0.2);
+}
+[data-theme="dopamine"] body::before{
+  background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(255,0,180,.1),transparent 60%),
+             radial-gradient(ellipse 50% 40% at 80% 80%,rgba(0,240,255,.08),transparent 60%);
+}
+
+/* ── Retrofuturism ── */
+[data-theme="retro"]{
+  --bg:#080820;--surface:#10103a;--card:#191956;--glass:rgba(25,25,86,0.9);
+  --border:rgba(255,0,180,0.35);--border-hi:rgba(0,255,255,0.4);
+  --text:#e0e0ff;--muted:#8080c0;--subtle:#a0a0e0;
+  --accent:#ff00cc;--accent2:#00ffcc;--accent-glow:rgba(255,0,204,0.2);
+}
+[data-theme="retro"] body{
+  background-image:linear-gradient(rgba(255,0,180,.04) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,0,180,.04) 1px,transparent 1px)!important;
+  background-size:40px 40px!important;background-color:#080820!important;
+}
+[data-theme="retro"] body::before,[data-theme="retro"] body::after{display:none}
+
+/* ── Monochromatic ── */
+[data-theme="mono"]{
+  --bg:#0a0f1a;--surface:#131e30;--card:#1c2d45;--glass:rgba(19,30,48,0.9);
+  --border:rgba(255,255,255,0.08);--border-hi:rgba(255,255,255,0.16);
+  --text:#f0f4f8;--muted:#4a6080;--subtle:#6a85a0;
+  --accent:#8fb8d4;--accent2:#b0cce0;--accent-glow:rgba(143,184,212,0.15);
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background .4s ease,color .3s ease;
+}
+
+/* Ambient background */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% -5%,rgba(0,200,150,.08),transparent 55%),
+    radial-gradient(ellipse 55% 45% at 85% 105%,rgba(93,95,239,.06),transparent 55%);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,200,150,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,200,150,.028) 1px,transparent 1px);
+  background-size:56px 56px;
+}
+
+/* ============================================================
+   LANDING PAGE
+============================================================ */
+#landing{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px 20px;
+}
+
+/* ── Stage 1: Typing ── */
+#typeStage{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:18px;
+  transition:opacity .65s ease,transform .65s ease;
+  text-align:center;
+}
+
+.badge-line{
+  display:inline-flex;align-items:center;gap:14px;
+  font-size:.68rem;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--muted);font-weight:500;
+}
+.badge-line::before,.badge-line::after{
+  content:'';display:block;width:36px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border-hi));
+}
+.badge-line::after{background:linear-gradient(90deg,var(--border-hi),transparent)}
+
+.logo-mark{
+  width:56px;height:56px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:16px;display:grid;place-items:center;
+  font-size:26px;
+  box-shadow:0 0 40px var(--accent-glow),0 8px 24px rgba(0,0,0,.4);
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+#typeText{
+  font-family:'Fraunces',serif;
+  font-size:clamp(2rem,5vw,3.6rem);
+  font-weight:900;
+  letter-spacing:-1.5px;
+  line-height:1.15;
+  background:linear-gradient(135deg,#fff 10%,var(--accent) 80%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  min-height:1.3em;
+}
+
+#cursor{
+  display:inline-block;width:3px;height:.85em;
+  background:var(--accent);border-radius:2px;margin-left:4px;
+  vertical-align:middle;animation:blink 1s step-end infinite;
+  box-shadow:0 0 12px var(--accent);
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.type-sub{
+  font-size:1rem;color:var(--subtle);font-weight:300;font-style:italic;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .7s ease,transform .7s ease;
+  letter-spacing:.2px;
+}
+.type-sub.show{opacity:1;transform:none}
+
+/* ── Stage 2: Auth ── */
+#authStage{
+  display:none;width:100%;max-width:520px;
+  flex-direction:column;align-items:center;gap:20px;
+  animation:fadeUp .6s cubic-bezier(.22,.68,0,1.2) forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+
+/* floating header */
+.auth-header{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  padding:0 2px;
+}
+.auth-logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Fraunces',serif;font-weight:700;font-size:1.1rem;color:var(--text);
+}
+.auth-logo-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:10px;display:grid;place-items:center;font-size:18px;
+}
+.auth-campus{font-size:.72rem;color:var(--muted);letter-spacing:.5px}
+
+/* Headline */
+.auth-headline{
+  font-family:'Fraunces',serif;
+  font-size:clamp(1.55rem,4vw,2.1rem);
+  font-weight:700;text-align:center;line-height:1.2;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--text) 30%,var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* Glass card */
+.auth-card{
+  width:100%;
+  background:var(--glass);
+  border:1px solid var(--border-hi);
+  border-radius:24px;
+  padding:30px 28px;
+  backdrop-filter:blur(32px);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,.06) inset,
+    0 16px 56px rgba(0,0,0,.6),
+    0 0 60px var(--accent-glow);
+  position:relative;overflow:hidden;
+}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+}
+.auth-card::after{
+  content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;
+  background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Tabs */
+.tabs{
+  display:flex;background:rgba(0,0,0,.3);
+  border-radius:12px;padding:4px;margin-bottom:24px;
+  border:1px solid var(--border);gap:3px;
+}
+.tab{
+  flex:1;padding:10px;border:none;background:none;
+  font-family:'DM Sans',sans-serif;font-weight:600;font-size:.84rem;
+  color:var(--muted);cursor:pointer;border-radius:9px;
+  transition:all var(--t);letter-spacing:.2px;
+}
+.tab.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;box-shadow:0 2px 16px rgba(0,200,150,.3);
+}
+[data-theme="brutalism"] .tab.active,[data-theme="light"] .tab.active{color:#fff}
+
+/* Fields */
+.field{margin-bottom:14px;position:relative}
+.field label{
+  display:block;font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.8px;
+  color:var(--subtle);margin-bottom:7px;
+}
+.field input,.field select{
+  width:100%;padding:11px 14px;
+  background:rgba(0,0,0,.35);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;
+  transition:border-color var(--t),box-shadow var(--t),background var(--t);
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-glow);
+  background:rgba(0,0,0,.5);
+}
+.field input.invalid{border-color:var(--danger)!important;box-shadow:0 0 0 3px rgba(248,113,113,.12)!important}
+.field select option{background:var(--card);color:var(--text)}
+
+/* Field hint */
+.field-hint{
+  font-size:.7rem;color:var(--danger);margin-top:5px;
+  display:none;
+}
+.field-hint.show{display:block}
+
+/* Role grid */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.role-btn{
+  padding:11px 8px;border:1px solid var(--border);
+  border-radius:9px;background:rgba(0,0,0,.25);
+  color:var(--subtle);font-family:'DM Sans',sans-serif;
+  font-size:.82rem;font-weight:500;cursor:pointer;text-align:center;
+  transition:all var(--t);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.role-btn:hover{border-color:var(--border-hi);color:var(--text);background:rgba(255,255,255,.04)}
+.role-btn.sel{
+  border-color:var(--accent);background:rgba(0,200,150,.1);
+  color:var(--accent);box-shadow:0 0 0 1px var(--accent);
+}
+
+/* School-Course cascades */
+.school-course-wrap{display:grid;gap:10px}
+
+/* Submit button */
+.btn-auth{
+  width:100%;padding:13px;margin-top:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:9px;
+  color:#fff;font-family:'DM Sans',sans-serif;
+  font-weight:600;font-size:.92rem;cursor:pointer;
+  transition:all var(--t);letter-spacing:.3px;
+  position:relative;overflow:hidden;
+}
+.btn-auth::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);
+  opacity:0;transition:opacity var(--t);
+}
+.btn-auth:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,200,150,.35)}
+.btn-auth:hover::before{opacity:1}
+.btn-auth:active{transform:translateY(0)}
+.btn-auth:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* Loading spinner inside button */
+.btn-auth .spinner{
+  display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .6s linear infinite;margin-right:8px;
+}
+.btn-auth.loading .spinner{display:inline-block}
+.btn-auth.loading .btn-text{opacity:.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Notice */
+.notice{
+  padding:11px 14px;border-radius:9px;font-size:.82rem;
+  margin-top:10px;display:none;border:1px solid transparent;
+  line-height:1.4;
+}
+.notice.err{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:var(--danger);display:flex;gap:8px;align-items:flex-start}
+.notice.ok {background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2);color:var(--success);display:flex;gap:8px;align-items:flex-start}
+
+/* Two-col */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Password strength */
+.pw-strength{
+  height:3px;border-radius:3px;margin-top:6px;
+  background:var(--border);overflow:hidden;
+}
+.pw-strength-bar{
+  height:100%;width:0%;border-radius:3px;
+  transition:width .4s ease,background .4s ease;
+}
+
+/* ── Particles ── */
+.particle{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  animation:drift linear infinite;
+}
+@keyframes drift{
+  0%  {transform:translateY(105vh) scale(.7);opacity:0}
+  8%  {opacity:.3}
+  92% {opacity:.1}
+  100%{transform:translateY(-10vh) scale(1.2) rotate(360deg);opacity:0}
+}
+
+/* ============================================================
+   THEME FAB & PANEL
+============================================================ */
+.theme-fab{
+  position:fixed;bottom:24px;right:24px;width:48px;height:48px;
+  background:var(--card);border:1px solid var(--border-hi);border-radius:50%;
+  display:grid;place-items:center;font-size:1.15rem;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:999;
+  transition:all var(--t-spring);
+}
+.theme-fab:hover{transform:scale(1.12) rotate(15deg);border-color:var(--accent);box-shadow:0 6px 24px var(--accent-glow)}
+
+.theme-panel{
+  position:fixed;bottom:82px;right:24px;width:272px;
+  background:var(--surface);border:1px solid var(--border-hi);border-radius:18px;
+  padding:20px;box-shadow:0 12px 48px rgba(0,0,0,.55);
+  z-index:998;opacity:0;pointer-events:none;transform:translateY(12px) scale(.97);
+  transition:all var(--t);
+}
+.theme-panel.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+.theme-panel h4{
+  font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--muted);margin-bottom:10px;
+}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px}
+.theme-btn{
+  background:var(--card);border:1px solid var(--border);padding:8px 6px;
+  border-radius:8px;color:var(--text);font-size:.75rem;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all var(--t);font-weight:500;
+}
+.theme-btn:hover{border-color:var(--accent);background:var(--card)}
+.theme-btn.active-theme{border-color:var(--accent);color:var(--accent)}
+
+.color-wheel-wrapper{
+  width:100%;aspect-ratio:1;border-radius:50%;
+  background:conic-gradient(hsl(0,100%,50%),hsl(45,100%,50%),hsl(90,100%,50%),hsl(135,100%,50%),hsl(180,100%,50%),hsl(225,100%,50%),hsl(270,100%,50%),hsl(315,100%,50%),hsl(360,100%,50%));
+  position:relative;cursor:crosshair;
+  box-shadow:inset 0 0 0 4px rgba(0,0,0,.2),0 4px 16px rgba(0,0,0,.3);
+}
+.color-ball{
+  width:18px;height:18px;background:#fff;border:3px solid #000;
+  border-radius:50%;position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);pointer-events:none;
+  box-shadow:0 2px 6px rgba(0,0,0,.5);transition:transform .1s;
+}
+
+/* ============================================================
+   FOOTER NOTE
+============================================================ */
+.footer-note{font-size:.7rem;color:var(--muted);text-align:center;margin-top:2px}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media(max-width:480px){
+  .auth-card{padding:22px 18px;border-radius:18px}
+  .row2{grid-template-columns:1fr}
+  .role-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="landing">
+
+  <!-- Stage 1: Typing animation -->
+  <div id="typeStage">
+    <div class="logo-mark">🎓</div>
+    <div class="badge-line">Christ (Deemed to be University) · NCR Campus</div>
+    <div id="typeText"><span id="typedChars"></span><span id="cursor"></span></div>
+    <div class="type-sub" id="typeSub">Your academic support, always online.</div>
+  </div>
+
+  <!-- Stage 2: Auth -->
+  <div id="authStage">
+
+    <div class="auth-header">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🎓</div>
+        Help Desk
+      </div>
+      <div class="auth-campus">NCR Campus · Ghaziabad</div>
+    </div>
+
+    <div class="auth-headline">Got a Doubt? We're Here.</div>
+
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="tab"        onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginSection">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="loginEmail" placeholder="you@christuniversity.in" autocomplete="email"/>
+          <div class="field-hint" id="loginEmailHint">Please enter a valid email address.</div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password"/>
+        </div>
+        <div class="notice" id="loginNotice"></div>
+        <button class="btn-auth" id="loginBtn" onclick="doLogin()">
+          <span class="spinner"></span><span class="btn-text">Sign In →</span>
+        </button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerSection" style="display:none">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="regName" placeholder="e.g. Priya Sharma" autocomplete="name"/>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="regEmail" placeholder="you@christuniversity.in"/>
+            <div class="field-hint" id="regEmailHint">Enter a valid email.</div>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="Min 8 chars" oninput="checkPwStrength(this.value)" autocomplete="new-password"/>
+            <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>I am a…</label>
+          <div class="role-grid">
+            <button class="role-btn" onclick="pickRole('student',this)">🎓 Student</button>
+            <button class="role-btn" onclick="pickRole('teacher',this)">👨‍🏫 Teacher</button>
+            <button class="role-btn" onclick="pickRole('admin',this)">🏛️ Admin</button>
+            <button class="role-btn" onclick="pickRole('hod',this)">🔑 HOD</button>
+          </div>
+          <input type="hidden" id="regRole"/>
+        </div>
+
+        <div id="roleFields"></div>
+
+        <div class="notice" id="regNotice"></div>
+        <button class="btn-auth" id="regBtn" onclick="doRegister()">
+          <span class="spinner"></span><span class="btn-text">Create Account →</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="footer-note">Christ University Help Desk &nbsp;·&nbsp; All Rights Reserved</div>
+  </div>
+
+</div>
+
+<!-- Theme FAB -->
+<button class="theme-fab" id="themeFab" aria-label="Change theme">🎨</button>
+
+<div class="theme-panel" id="themePanel" role="dialog" aria-label="Theme selector">
+  <h4>Predefined Themes</h4>
+  <div class="theme-grid">
+    <button class="theme-btn" data-theme-val="dark"      onclick="setTheme('dark')">🌑 Dark</button>
+    <button class="theme-btn" data-theme-val="light"     onclick="setTheme('light')">☀️ Light</button>
+    <button class="theme-btn" data-theme-val="glass"     onclick="setTheme('glass')">🔮 Glass</button>
+    <button class="theme-btn" data-theme-val="brutalism" onclick="setTheme('brutalism')">🟥 Brutalism</button>
+    <button class="theme-btn" data-theme-val="dopamine"  onclick="setTheme('dopamine')">🌈 Dopamine</button>
+    <button class="theme-btn" data-theme-val="retro"     onclick="setTheme('retro')">📼 Retro</button>
+    <button class="theme-btn" data-theme-val="mono"      onclick="setTheme('mono')">⬛ Mono</button>
+  </div>
+  <h4>Custom Accent Colour</h4>
+  <div class="color-wheel-wrapper" id="colorWheel">
+    <div class="color-ball" id="colorBall"></div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   CONFIG
+───────────────────────────────────────────────────────── */
+const API_BASE = (window.API_BASE || 'http://localhost:5000') + '/api';
+
+/* ─────────────────────────────────────────────────────────
+   SECURITY UTILS
+───────────────────────────────────────────────────────── */
+/** Sanitise a plain string to prevent XSS if injected into innerHTML */
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+/** Validate email with RFC 5322-friendly regex */
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+/** Validate password strength */
+function isStrongPassword(pw) { return pw.length >= 8; }
+
+/* ─────────────────────────────────────────────────────────
+   REDIRECT IF ALREADY LOGGED IN
+───────────────────────────────────────────────────────── */
+(function checkSession() {
+  try {
+    const token = localStorage.getItem('hd_token');
+    const user  = localStorage.getItem('hd_user');
+    if (token && user) {
+      // basic sanity: token is a JWT (3 dot-separated segments)
+      if (token.split('.').length === 3) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+  } catch(_) { /* localStorage blocked in private mode — ignore */ }
+})();
+
+/* ─────────────────────────────────────────────────────────
+   SAFE STORAGE HELPERS
+───────────────────────────────────────────────────────── */
+function safeSet(key, val) { try { localStorage.setItem(key, val); } catch(_){} }
+function safeGet(key, def='')  { try { return localStorage.getItem(key) ?? def; } catch(_){ return def; } }
+function safeRemove(key)       { try { localStorage.removeItem(key); } catch(_){} }
+
+/* ─────────────────────────────────────────────────────────
+   PARTICLES
+───────────────────────────────────────────────────────── */
+const PCOLS = ['var(--accent)','var(--accent2)','var(--info)'];
+for (let i = 0; i < 18; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const sz = Math.random() * 5 + 2.5;
+  p.style.cssText = [
+    `width:${sz}px`,`height:${sz}px`,`left:${Math.random()*100}%`,
+    `background:${PCOLS[i%3]}`,
+    `animation-duration:${Math.random()*20+12}s`,
+    `animation-delay:${Math.random()*12}s`,
+    `opacity:.4`
+  ].join(';');
+  document.body.appendChild(p);
+}
+
+/* ─────────────────────────────────────────────────────────
+   TYPING ANIMATION
+───────────────────────────────────────────────────────── */
+(function runTyping() {
+  const el    = document.getElementById('typedChars');
+  const stage = document.getElementById('typeStage');
+  const sub   = document.getElementById('typeSub');
+  const auth  = document.getElementById('authStage');
+  const P1    = 'Welcome To Help Desk';
+  const P2    = 'Got a Doubt? Ask Us.';
+  let idx = 0, phase = 1;
+
+  function tick() {
+    if (phase === 1) {
+      if (idx <= P1.length) { el.textContent = P1.slice(0, idx++); setTimeout(tick, 72); }
+      else { setTimeout(() => { phase = 2; tick(); }, 1200); }
+    } else if (phase === 2) {
+      if (idx > 0) { el.textContent = P1.slice(0, --idx); setTimeout(tick, 35); }
+      else { setTimeout(() => { phase = 3; tick(); }, 380); }
+    } else if (phase === 3) {
+      if (idx <= P2.length) { el.textContent = P2.slice(0, idx++); setTimeout(tick, 76); }
+      else {
+        sub.classList.add('show');
+        const cur = document.getElementById('cursor');
+        cur.style.animation = 'none'; cur.style.opacity = '0';
+        setTimeout(revealAuth, 1700);
+      }
+    }
+  }
+
+  function revealAuth() {
+    stage.style.transition = 'opacity .6s ease, transform .6s ease';
+    stage.style.opacity = '0'; stage.style.transform = 'translateY(-28px)';
+    setTimeout(() => { stage.style.display = 'none'; auth.style.display = 'flex'; }, 600);
+  }
+
+  setTimeout(tick, 450);
+})();
+
+/* ─────────────────────────────────────────────────────────
+   TAB SWITCHING
+───────────────────────────────────────────────────────── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1))
+  );
+  document.getElementById('loginSection').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('registerSection').style.display = tab === 'register' ? 'block' : 'none';
+  // Clear notices on tab switch
+  ['loginNotice','regNotice'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'notice'; el.textContent = ''; }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+   SCHOOLS & COURSES — Christ University Delhi NCR
+───────────────────────────────────────────────────────── */
+const SCHOOLS = {
+  'School of Commerce, Finance & Accountancy': [
+    'BCom (Hons)', 'BCom (Finance & Accountancy)', 'BCom (Professional)',
+    'MCom', 'MCom (Finance)'
+  ],
+  'School of Business & Management': [
+    'BBA', 'BBA (Business Analytics)', 'BBA (International Business)',
+    'MBA', 'MBA (Finance)', 'MBA (Marketing)', 'MBA (HR)'
+  ],
+  'School of Law': [
+    'BA LLB (Hons)', 'BBA LLB (Hons)', 'BCom LLB (Hons)', 'LLB', 'LLM'
+  ],
+  'School of Sciences': [
+    'BCA', 'BCA (Artificial Intelligence & ML)', 'BCA (Data Science)',
+    'BSc (Computer Science)', 'BSc (Information Technology)',
+    'BSc (Physics, Chemistry & Math)', 'MSc (Computer Science)'
+  ],
+  'School of Social Sciences': [
+    'BA (Psychology)', 'BA (Economics)', 'BA (Sociology)',
+    'MA (Psychology)', 'MA (Economics)', 'MSW'
+  ],
+  'School of Arts & Humanities': [
+    'BA (English)', 'BA (Journalism & Mass Communication)',
+    'BA (History & Political Science)', 'BA (Media Studies)',
+    'MA (English)', 'MA (Journalism)'
+  ]
+};
+
+/* Build school <select> HTML */
+function buildSchoolSelect(id) {
+  return `<select id="${escapeHTML(id)}" onchange="populateCourses('${escapeHTML(id)}','${escapeHTML(id.replace('School','Course'))}')">
+    <option value="">Select School</option>
+    ${Object.keys(SCHOOLS).map(s=>`<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join('')}
+  </select>`;
+}
+/* Build empty course <select> */
+function buildCourseSelect(id) {
+  return `<select id="${escapeHTML(id)}"><option value="">Select Course</option></select>`;
+}
+/* Populate courses on school change */
+function populateCourses(schoolId, courseId) {
+  const school  = document.getElementById(schoolId)?.value;
+  const courses = (school && SCHOOLS[school]) ? SCHOOLS[school] : [];
+  const sel     = document.getElementById(courseId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Select Course</option>'
+    + courses.map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+}
+
+/* ─────────────────────────────────────────────────────────
+   ROLE-SPECIFIC FIELDS
+───────────────────────────────────────────────────────── */
+const ROLE_HTML = {
+  student: `
+    <div class="school-course-wrap">
+      <div class="field">
+        <label>School / Faculty</label>
+        ${buildSchoolSelect('rStudentSchool')}
+      </div>
+      <div class="field">
+        <label>Course / Programme</label>
+        ${buildCourseSelect('rStudentCourse')}
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Semester</label>
+        <select id="rSem">
+          ${[1,2,3,4,5,6,7,8].map((s,i)=>`<option value="${s}">${s}${['st','nd','rd','th','th','th','th','th'][i]} Sem</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Section</label>
+        <select id="rSection">
+          <option value="">Select</option>
+          ${['A','B','C','D','E'].map(c=>`<option value="${c}">${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>`,
+
+  teacher: `
+    <div class="school-course-wrap">
+      <div class="field">
+        <label>School / Department</label>
+        ${buildSchoolSelect('rTeacherSchool')}
+      </div>
+      <div class="field">
+        <label>Course You Teach</label>
+        ${buildCourseSelect('rTeacherCourse')}
+      </div>
+    </div>
+    <div class="field">
+      <label>Subject / Paper</label>
+      <input type="text" id="rSubject" placeholder="e.g. Data Structures & Algorithms" maxlength="100"/>
+    </div>
+    <div class="field">
+      <label>Sections You Handle (comma-separated)</label>
+      <input type="text" id="rClasses" placeholder="e.g. BCA-A, BCA-B" maxlength="200"/>
+    </div>`,
+
+  admin: `
+    <div class="field">
+      <label>Administrative Role</label>
+      <select id="rAdminType">
+        <option value="">Select role</option>
+        <option>Dean</option><option>Coordinator</option><option>Director</option>
+        <option>Academic Administrator</option><option>Vice-President</option>
+        <option>Vice-Chancellor</option><option>Chancellor</option>
+      </select>
+    </div>`,
+
+  hod: `
+    <div class="field">
+      <label>Your School / Department</label>
+      ${buildSchoolSelect('rHodSchool')}
+    </div>`,
+};
+
+let selectedRole = '';
+function pickRole(role, btn) {
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedRole = role;
+  document.getElementById('regRole').value = role;
+  document.getElementById('roleFields').innerHTML = ROLE_HTML[role] || '';
+}
+
+/* ─────────────────────────────────────────────────────────
+   PASSWORD STRENGTH
+───────────────────────────────────────────────────────── */
+function checkPwStrength(pw) {
+  const bar = document.getElementById('pwBar');
+  if (!bar) return;
+  let score = 0;
+  if (pw.length >= 8)  score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const pct  = (score / 5) * 100;
+  const cols  = ['#f87171','#fbbf24','#fbbf24','#34d399','#00c896'];
+  bar.style.width = pct + '%';
+  bar.style.background = cols[Math.max(0, score - 1)] || '#f87171';
+}
+
+/* ─────────────────────────────────────────────────────────
+   NOTICE HELPER
+───────────────────────────────────────────────────────── */
+function showNotice(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'notice ' + type;
+  const icon = type === 'err' ? '⚠️' : '✅';
+  el.innerHTML = `<span>${icon}</span><span>${escapeHTML(msg)}</span>`;
+}
+
+/* ─────────────────────────────────────────────────────────
+   API HELPER — no credentials ever leaked in JS
+───────────────────────────────────────────────────────── */
+async function apiCall(path, method = 'GET', body = null, needsAuth = false) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (needsAuth) {
+    const tok = safeGet('hd_token');
+    if (!tok) throw new Error('Not authenticated');
+    headers['Authorization'] = 'Bearer ' + tok;
+  }
+  const res = await fetch(API_BASE + path, {
+    method,
+    headers,
+    credentials: 'omit', // do not send cookies cross-origin
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RATE-LIMIT GUARD (client-side simple debounce)
+───────────────────────────────────────────────────────── */
+const _lastAttempt = {};
+function rateLimitOk(key, minGapMs = 1200) {
+  const now = Date.now();
+  if (_lastAttempt[key] && (now - _lastAttempt[key]) < minGapMs) return false;
+  _lastAttempt[key] = now;
+  return true;
+}
+
+function setLoading(btnId, on) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+
+/* ─────────────────────────────────────────────────────────
+   LOGIN
+───────────────────────────────────────────────────────── */
+async function doLogin() {
+  if (!rateLimitOk('login')) return;
+
+  const emailEl = document.getElementById('loginEmail');
+  const passEl  = document.getElementById('loginPassword');
+  const email   = emailEl.value.trim();
+  const pass    = passEl.value;
+
+  // Front-end validation
+  let valid = true;
+  if (!isValidEmail(email)) {
+    emailEl.classList.add('invalid');
+    document.getElementById('loginEmailHint').classList.add('show');
+    valid = false;
+  } else {
+    emailEl.classList.remove('invalid');
+    document.getElementById('loginEmailHint').classList.remove('show');
+  }
+  if (!pass) { showNotice('loginNotice', 'Please enter your password.', 'err'); valid = false; }
+  if (!valid) return;
+
+  setLoading('loginBtn', true);
+  try {
+    const d = await apiCall('/auth/login', 'POST', { email, password: pass });
+    safeSet('hd_token', d.token);
+    safeSet('hd_user',  JSON.stringify(d.user));
+    showNotice('loginNotice', 'Login successful! Redirecting…', 'ok');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+  } catch(e) {
+    showNotice('loginNotice', e.message, 'err');
+    setLoading('loginBtn', false);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   REGISTER
+───────────────────────────────────────────────────────── */
+async function doRegister() {
+  if (!rateLimitOk('register')) return;
+
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPassword').value;
+  const role  = selectedRole;
+
+  if (!name  || name.length < 2)  { showNotice('regNotice', 'Enter your full name (min 2 characters).', 'err'); return; }
+  if (!isValidEmail(email))        { showNotice('regNotice', 'Enter a valid email address.', 'err'); return; }
+  if (!isStrongPassword(pass))     { showNotice('regNotice', 'Password must be at least 8 characters.', 'err'); return; }
+  if (!role)                        { showNotice('regNotice', 'Select your role to continue.', 'err'); return; }
+
+  // Build request payload — only include what the server expects
+  const body = {
+    name:  name.slice(0, 100),    // max length guard
+    email: email.toLowerCase(),
+    password: pass,
+    role
+  };
+
+  // Role-specific fields
+  if (role === 'student') {
+    const school  = document.getElementById('rStudentSchool')?.value;
+    const course  = document.getElementById('rStudentCourse')?.value;
+    const sem     = document.getElementById('rSem')?.value;
+    const section = document.getElementById('rSection')?.value;
+    if (!school || !course || !section) { showNotice('regNotice', 'Please complete all student details.', 'err'); return; }
+    body.department    = school;
+    body.class_section = `${course}-${section}`;
+    body.semester      = parseInt(sem, 10) || 1;
+  } else if (role === 'teacher') {
+    const school  = document.getElementById('rTeacherSchool')?.value;
+    const subject = (document.getElementById('rSubject')?.value || '').trim();
+    const raw     = (document.getElementById('rClasses')?.value || '');
+    if (!school) { showNotice('regNotice', 'Select your school / department.', 'err'); return; }
+    body.department    = school;
+    body.subject       = subject.slice(0, 200);
+    body.classes_taught = raw.split(',').map(s => s.trim()).filter(Boolean).slice(0, 20);
+  } else if (role === 'admin') {
+    const atype = document.getElementById('rAdminType')?.value;
+    if (!atype) { showNotice('regNotice', 'Select your administrative role.', 'err'); return; }
+    body.admin_type = atype;
+  } else if (role === 'hod') {
+    const school = document.getElementById('rHodSchool')?.value;
+    if (!school) { showNotice('regNotice', 'Select your school / department.', 'err'); return; }
+    body.department = school;
+  }
+
+  setLoading('regBtn', true);
+  try {
+    await apiCall('/auth/register', 'POST', body);
+    showNotice('regNotice', 'Account created! Switching to sign-in…', 'ok');
+    setTimeout(() => switchTab('login'), 1600);
+  } catch(e) {
+    showNotice('regNotice', e.message, 'err');
+  } finally {
+    setLoading('regBtn', false);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   ENTER KEY SUPPORT
+───────────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const loginVisible = document.getElementById('loginSection')?.style.display !== 'none';
+  loginVisible ? doLogin() : doRegister();
+});
+
+/* ─────────────────────────────────────────────────────────
+   THEME SYSTEM
+───────────────────────────────────────────────────────── */
+function setTheme(name) {
+  document.documentElement.setAttribute('data-theme', name);
+  safeSet('hd_theme', name);
+  // Update active button highlight
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active-theme', b.getAttribute('data-theme-val') === name);
+  });
+  if (name !== 'custom') {
+    document.documentElement.style.removeProperty('--accent');
+    document.documentElement.style.removeProperty('--accent2');
+  }
+}
+
+function applyCustomHue(hue) {
+  hue = parseFloat(hue) || 180;
+  document.documentElement.style.setProperty('--accent',  `hsl(${hue},100%,50%)`);
+  document.documentElement.style.setProperty('--accent2', `hsl(${(hue+45)%360},80%,62%)`);
+  // Position the ball
+  const wheel = document.getElementById('colorWheel');
+  const ball  = document.getElementById('colorBall');
+  if (!wheel || !ball) return;
+  const w = wheel.offsetWidth || 240;
+  const r = w / 2 - 12;
+  const rad = (hue - 90) * (Math.PI / 180);
+  ball.style.left = `${Math.cos(rad) * r + w / 2}px`;
+  ball.style.top  = `${Math.sin(rad) * r + w / 2}px`;
+}
+
+// Init theme
+(function initTheme() {
+  const saved = safeGet('hd_theme', 'dark');
+  setTheme(saved);
+  if (saved === 'custom') applyCustomHue(parseFloat(safeGet('hd_hue', '180')));
+})();
+
+// FAB toggle
+document.getElementById('themeFab').addEventListener('click', () => {
+  document.getElementById('themePanel').classList.toggle('open');
+});
+// Close panel when clicking outside
+document.addEventListener('click', e => {
+  const panel = document.getElementById('themePanel');
+  const fab   = document.getElementById('themeFab');
+  if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== fab) {
+    panel.classList.remove('open');
+  }
+});
+
+// Colour wheel drag
+const wheel = document.getElementById('colorWheel');
+const ball  = document.getElementById('colorBall');
+let dragging = false;
+
+function wheelInteract(e) {
+  if (!dragging && e.type !== 'click') return;
+  e.preventDefault();
+  const rect = wheel.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top  + rect.height / 2;
+  const px = e.touches ? e.touches[0].clientX : e.clientX;
+  const py = e.touches ? e.touches[0].clientY : e.clientY;
+  let deg  = Math.atan2(py - cy, px - cx) * (180 / Math.PI) + 90;
+  if (deg < 0) deg += 360;
+  applyCustomHue(deg);
+  setTheme('custom');
+  safeSet('hd_hue', String(deg));
+}
+
+wheel.addEventListener('mousedown',  e => { dragging = true;  wheelInteract(e); });
+document.addEventListener('mousemove', wheelInteract);
+document.addEventListener('mouseup',   () => { dragging = false; });
+wheel.addEventListener('touchstart', e => { dragging = true;  wheelInteract(e); }, { passive: false });
+document.addEventListener('touchmove',  wheelInteract, { passive: false });
+document.addEventListener('touchend',  () => { dragging = false; });
+</script>
+</body>
+</html>
