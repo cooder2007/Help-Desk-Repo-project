@@ -6,686 +6,7 @@
 <title>Dashboard — Christ University Help Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"/>
-<style>
-/* ============================================================
-   DESIGN TOKENS
-============================================================ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --bg:#020810;
-  --surface:#070f1e;
-  --card:#0b1629;
-  --glass:rgba(7,15,30,.82);
-  --border:rgba(255,255,255,.055);
-  --border-hi:rgba(255,255,255,.12);
-  --text:#dde4f0;
-  --muted:#3d4e6a;
-  --subtle:#6e82a6;
-  --accent:#00c896;
-  --accent2:#5d5fef;
-  --accent-glow:rgba(0,200,150,.15);
-  --danger:#f87171;
-  --warning:#fbbf24;
-  --success:#34d399;
-  --info:#60a5fa;
-  --t:.2s cubic-bezier(.4,0,.2,1);
-  --t-spring:.4s cubic-bezier(.34,1.56,.64,1);
-  --r8:8px;--r12:12px;--r16:16px;--r20:20px;
-  --nav-h:60px;
-  --sb-w:222px;
-  --mc-pt:28px;  /* main-content padding-top  */
-  --mc-pb:40px;  /* main-content padding-bottom */
-}
-
-/* ── Themes ─────────────────────────────────────────────── */
-[data-theme="light"]{
-  --bg:#eef2f8;--surface:#fff;--card:#f8fafc;--glass:rgba(255,255,255,.85);
-  --border:rgba(0,0,0,.08);--border-hi:rgba(0,0,0,.16);
-  --text:#111827;--muted:#9ca3af;--subtle:#6b7280;
-  --accent:#0284c7;--accent2:#7c3aed;--accent-glow:rgba(2,132,199,.12);
-}
-[data-theme="glass"]{
-  --surface:rgba(255,255,255,.22);--card:rgba(255,255,255,.28);
-  --glass:rgba(255,255,255,.32);--border:rgba(255,255,255,.45);--border-hi:rgba(255,255,255,.65);
-  --text:#0a1628;--muted:#506080;--subtle:#2d4a72;
-  --accent:#1d4ed8;--accent2:#7c3aed;--accent-glow:rgba(29,78,216,.12);
-}
-[data-theme="glass"] body{background:linear-gradient(135deg,#a8c8f8 0%,#c5e8fc 50%,#d4c5fb 100%) !important}
-[data-theme="glass"] body::before,[data-theme="glass"] body::after{display:none}
-[data-theme="glass"] .card,[data-theme="glass"] .tk,
-[data-theme="glass"] .top-nav,[data-theme="glass"] .sidebar{
-  background:rgba(255,255,255,.25) !important;
-  backdrop-filter:blur(24px) !important;
-  box-shadow:0 4px 24px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.5) !important;
-}
-[data-theme="brutalism"]{
-  --bg:#fffbf0;--surface:#fff;--card:#fff;--glass:#fff;
-  --border:#111;--border-hi:#111;--text:#111;--muted:#666;--subtle:#444;
-  --accent:#e63000;--accent2:#f5c400;--accent-glow:rgba(230,48,0,.1);
-}
-[data-theme="brutalism"] body::before,[data-theme="brutalism"] body::after{display:none}
-[data-theme="brutalism"] body{background:#fffbf0 !important}
-[data-theme="brutalism"] .card,[data-theme="brutalism"] .tk,
-[data-theme="brutalism"] .stat-card,[data-theme="brutalism"] .chat-outer{
-  border:3px solid #111 !important;border-radius:0 !important;
-  box-shadow:5px 5px 0 #111 !important;backdrop-filter:none !important;
-}
-[data-theme="brutalism"] .btn{border-radius:0 !important}
-[data-theme="brutalism"] .btn-p:hover{transform:translate(3px,3px) !important;box-shadow:2px 2px 0 #111 !important}
-[data-theme="dopamine"]{
-  --bg:#0e0618;--surface:#1a0a30;--card:#230e40;--glass:rgba(35,14,64,.92);
-  --border:rgba(255,0,180,.3);--border-hi:rgba(0,240,255,.4);
-  --text:#fff;--muted:#d08aff;--subtle:#e8b0ff;
-  --accent:#00f0ff;--accent2:#ff00b4;--accent-glow:rgba(0,240,255,.22);
-}
-[data-theme="retro"]{
-  --bg:#080820;--surface:#10103a;--card:#191956;--glass:rgba(25,25,86,.92);
-  --border:rgba(255,0,180,.35);--border-hi:rgba(0,255,255,.4);
-  --text:#e0e0ff;--muted:#8080c0;--subtle:#a0a0e0;
-  --accent:#ff00cc;--accent2:#00ffcc;--accent-glow:rgba(255,0,204,.2);
-}
-[data-theme="retro"] body{
-  background-image:linear-gradient(rgba(255,0,180,.04) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(255,0,180,.04) 1px,transparent 1px) !important;
-  background-size:40px 40px !important;background-color:#080820 !important;
-}
-[data-theme="retro"] body::before,[data-theme="retro"] body::after{display:none}
-[data-theme="mono"]{
-  --bg:#0a0f1a;--surface:#131e30;--card:#1c2d45;--glass:rgba(19,30,48,.92);
-  --border:rgba(255,255,255,.08);--border-hi:rgba(255,255,255,.16);
-  --text:#f0f4f8;--muted:#4a6080;--subtle:#6a85a0;
-  --accent:#8fb8d4;--accent2:#b0cce0;--accent-glow:rgba(143,184,212,.12);
-}
-
-/* ============================================================
-   BASE
-============================================================ */
-html,body{height:100%}
-body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--bg);color:var(--text);
-  min-height:100vh;overflow-x:hidden;
-  transition:background .4s,color .3s;
-}
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(ellipse 70% 55% at 15% -5%,rgba(0,200,150,.07),transparent 55%),
-    radial-gradient(ellipse 55% 45% at 85% 105%,rgba(93,95,239,.06),transparent 55%);
-}
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:
-    linear-gradient(rgba(0,200,150,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,200,150,.025) 1px,transparent 1px);
-  background-size:56px 56px;
-}
-h1,h2,h3,h4,h5{font-family:'Fraunces',serif;font-weight:700;line-height:1.2}
-a{color:var(--accent);text-decoration:none}
-
-/* ============================================================
-   TOP NAV
-============================================================ */
-.top-nav{
-  position:sticky;top:0;z-index:200;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 22px;height:var(--nav-h);
-  background:var(--glass);border-bottom:1px solid var(--border);
-  backdrop-filter:blur(24px);
-}
-.nav-left{display:flex;align-items:center;gap:12px}
-.nav-logo{
-  display:flex;align-items:center;gap:10px;
-  font-family:'Fraunces',serif;font-weight:700;font-size:1.05rem;
-  color:var(--text);text-decoration:none;
-}
-.logo-dot{
-  width:34px;height:34px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  border-radius:10px;display:grid;place-items:center;font-size:17px;flex-shrink:0;
-}
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:.76rem;color:var(--muted)}
-.breadcrumb span{color:var(--subtle)}
-.bc-sep{opacity:.4}
-.nav-right{display:flex;align-items:center;gap:10px}
-.user-pill{
-  display:flex;align-items:center;gap:8px;
-  padding:6px 14px;background:rgba(0,0,0,.25);
-  border:1px solid var(--border);border-radius:100px;
-  font-size:.82rem;color:var(--subtle);
-}
-.user-pill strong{color:var(--text);font-weight:600}
-.rbadge{padding:2px 10px;border-radius:100px;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.rb-student{background:rgba(0,200,150,.15);color:var(--accent)}
-.rb-teacher{background:rgba(99,102,241,.15);color:#a5b4fc}
-.rb-admin{background:rgba(248,113,113,.15);color:#fca5a5}
-.rb-hod{background:rgba(251,191,36,.15);color:var(--warning)}
-
-/* ============================================================
-   APP LAYOUT  (sidebar + main side-by-side)
-============================================================ */
-.app-body{
-  display:flex;
-  /* FIX: exact remaining height so AI chat can fill it */
-  height:calc(100vh - var(--nav-h));
-  position:relative;z-index:1;
-  overflow:hidden;
-}
-
-/* ── Sidebar ── */
-.sidebar{
-  width:var(--sb-w);flex-shrink:0;
-  background:var(--surface);border-right:1px solid var(--border);
-  padding:12px 10px 24px;
-  display:flex;flex-direction:column;gap:2px;
-  height:100%;overflow-y:auto;
-}
-.sb-label{
-  font-size:.62rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:1px;color:var(--muted);padding:10px 12px 4px;
-}
-
-/* ── AI nav button (top of sidebar) ── */
-.nav-btn-ai{
-  display:flex;align-items:center;gap:10px;
-  padding:11px 13px;border-radius:var(--r8);
-  font-size:.84rem;font-weight:600;cursor:pointer;
-  /* FIX: use rgba fallback instead of color-mix() for broader compat */
-  border:1px solid rgba(0,200,150,.28);
-  width:100%;text-align:left;font-family:'DM Sans',sans-serif;
-  margin-bottom:6px;
-  background:linear-gradient(135deg,rgba(0,200,150,.1),rgba(93,95,239,.08));
-  color:var(--accent);
-  position:relative;overflow:hidden;transition:all var(--t);
-}
-.nav-btn-ai::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
-  transform:translateX(-120%);transition:transform .7s ease;
-  pointer-events:none;
-}
-.nav-btn-ai:hover::after{transform:translateX(120%)}
-.nav-btn-ai:hover{border-color:var(--accent);box-shadow:0 0 20px var(--accent-glow)}
-.nav-btn-ai.active{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:#fff;border-color:transparent;
-  box-shadow:0 4px 20px var(--accent-glow);
-}
-.nav-btn-ai .ni{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0}
-.ai-new-badge{
-  margin-left:auto;font-size:.57rem;font-weight:800;
-  padding:2px 7px;border-radius:100px;letter-spacing:.6px;
-  text-transform:uppercase;background:var(--accent);color:#071018;flex-shrink:0;
-}
-.nav-btn-ai.active .ai-new-badge{background:rgba(255,255,255,.28);color:#fff}
-
-/* ── Regular sidebar nav buttons ── */
-.nav-btn{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 13px;border-radius:var(--r8);
-  color:var(--muted);font-size:.84rem;font-weight:500;
-  cursor:pointer;transition:all var(--t);
-  border:1px solid transparent;background:none;width:100%;
-  text-align:left;font-family:'DM Sans',sans-serif;
-}
-.nav-btn:hover{background:rgba(255,255,255,.04);color:var(--text)}
-.nav-btn.active{
-  background:rgba(0,200,150,.1);color:var(--accent);
-  border-color:rgba(0,200,150,.18);
-}
-.nav-btn .ni{font-size:1rem;width:22px;text-align:center;flex-shrink:0}
-.nb-count{
-  margin-left:auto;font-size:.66rem;font-weight:700;
-  padding:1px 7px;border-radius:100px;
-  background:rgba(0,200,150,.18);color:var(--accent);
-}
-
-/* Sidebar bottom user card */
-.sb-user-card{
-  margin:auto 0 0;padding:14px 12px;
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r12);
-}
-.sb-user-name{font-weight:600;font-size:.88rem;color:var(--text);margin-bottom:2px}
-.sb-user-role{font-size:.72rem;color:var(--muted)}
-
-/* ── Main content column ── */
-/* FIX: must be flex column so #pageAI can stretch to fill height */
-.main-content{
-  flex:1;min-width:0;
-  padding:var(--mc-pt) 28px var(--mc-pb);
-  overflow-y:auto;
-  display:flex;flex-direction:column;
-  /* FIX: full height of parent .app-body */
-  height:100%;
-}
-.page-header{margin-bottom:24px;flex-shrink:0}
-.pg-title{
-  font-family:'Fraunces',serif;font-weight:900;
-  font-size:clamp(1.4rem,2.5vw,1.85rem);letter-spacing:-.5px;margin-bottom:4px;
-}
-.pg-sub{color:var(--muted);font-size:.84rem;line-height:1.5}
-
-/* ============================================================
-   STAT CARDS
-============================================================ */
-.stat-row{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:14px;margin-bottom:24px;flex-shrink:0;
-}
-@media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr)}}
-.stat-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r16);padding:18px 20px;
-  position:relative;overflow:hidden;transition:all var(--t);
-}
-.stat-card:hover{border-color:var(--border-hi);transform:translateY(-2px)}
-.stat-card::before{
-  content:'';position:absolute;top:-30px;right:-30px;
-  width:90px;height:90px;border-radius:50%;
-  background:radial-gradient(circle,var(--stat-c,var(--accent)) 14%,transparent 70%);
-  pointer-events:none;opacity:.25;
-}
-.stat-icon{font-size:1.3rem;margin-bottom:10px}
-.stat-val{
-  font-family:'Fraunces',serif;font-size:1.9rem;font-weight:900;
-  letter-spacing:-1px;line-height:1;margin-bottom:4px;
-  color:var(--stat-c,var(--accent));
-}
-.stat-label{font-size:.76rem;color:var(--muted);font-weight:500}
-
-/* ============================================================
-   CARDS & BUTTONS
-============================================================ */
-.card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r16);padding:22px;margin-bottom:16px;
-  transition:border-color var(--t);flex-shrink:0;
-}
-.card:hover{border-color:var(--border-hi)}
-.card-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);
-}
-.card-hd h3{font-size:1rem;font-family:'Fraunces',serif}
-.card-hd p{font-size:.75rem;color:var(--muted);margin-top:2px}
-
-.btn{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:8px 16px;border-radius:var(--r8);
-  font-size:.83rem;font-weight:600;font-family:'DM Sans',sans-serif;
-  cursor:pointer;border:none;transition:all var(--t);
-}
-.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.btn-p:hover{transform:translateY(-1px);box-shadow:0 5px 20px var(--accent-glow)}
-.btn-o{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-o:hover{border-color:var(--border-hi);background:rgba(255,255,255,.03)}
-.btn-sm{padding:5px 12px;font-size:.78rem}
-.btn-danger{background:rgba(248,113,113,.12);color:var(--danger);border:1px solid rgba(248,113,113,.2)}
-.btn-danger:hover{background:rgba(248,113,113,.2)}
-
-/* ============================================================
-   TICKET ITEMS
-============================================================ */
-.tickets-list{display:flex;flex-direction:column;gap:8px}
-.tk{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r12);padding:16px 18px;
-  display:flex;align-items:flex-start;gap:14px;
-  cursor:pointer;transition:all var(--t);
-  position:relative;overflow:hidden;
-}
-.tk::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--tk-c,var(--border));border-radius:3px 0 0 3px;
-  transition:background var(--t);
-}
-.tk:hover{border-color:var(--accent);background:var(--card);transform:translateX(4px)}
-.tk:hover::before{background:var(--accent)}
-.tk-icon{
-  width:38px;height:38px;flex-shrink:0;border-radius:10px;
-  display:grid;place-items:center;font-size:1.1rem;
-  background:rgba(255,255,255,.05);border:1px solid var(--border);
-}
-.tk-body{flex:1;min-width:0}
-.tk-title{
-  font-weight:600;font-size:.92rem;color:var(--text);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;
-}
-.tk-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.tk-actions{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0}
-.tk-time{font-size:.7rem;color:var(--muted)}
-.uv-btn{
-  display:flex;align-items:center;gap:5px;
-  padding:5px 12px;border-radius:100px;
-  background:rgba(0,0,0,.3);border:1px solid var(--border);
-  color:var(--muted);font-size:.77rem;font-weight:700;
-  cursor:pointer;transition:all var(--t);font-family:'DM Sans',sans-serif;
-}
-.uv-btn:hover,.uv-btn.voted{
-  border-color:var(--accent);
-  background:rgba(0,200,150,.15);color:var(--accent);
-}
-
-/* ============================================================
-   STATUS & CATEGORY PILLS
-============================================================ */
-.pill{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:2px 10px;border-radius:100px;
-  font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;
-}
-.pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.8}
-.pl-open       {background:rgba(96,165,250,.14);color:var(--info)}
-.pl-in_progress{background:rgba(251,191,36,.14);color:var(--warning)}
-.pl-resolved   {background:rgba(52,211,153,.14);color:var(--success)}
-.pl-closed     {background:rgba(107,114,128,.14);color:#9ca3af}
-.cat-pill{
-  display:inline-flex;align-items:center;
-  padding:2px 9px;border-radius:100px;
-  font-size:.67rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;
-}
-.cat-academic  {background:rgba(93,95,239,.15);color:#a5b4fc}
-.cat-admin     {background:rgba(0,200,150,.12);color:var(--accent)}
-.cat-technical {background:rgba(96,165,250,.13);color:var(--info)}
-.cat-finance   {background:rgba(251,191,36,.13);color:var(--warning)}
-
-/* ============================================================
-   NOTICE / EMPTY STATE
-============================================================ */
-.notice{
-  padding:11px 14px;border-radius:var(--r8);font-size:.82rem;
-  display:none;border:1px solid transparent;line-height:1.4;margin-bottom:12px;
-}
-.notice.err{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.2);color:var(--danger);display:flex;gap:8px;align-items:flex-start}
-.notice.ok {background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.18);color:var(--success);display:flex;gap:8px;align-items:flex-start}
-.empty-state{text-align:center;padding:48px 24px;color:var(--muted)}
-.empty-state .es-icon{font-size:3rem;margin-bottom:14px;opacity:.5}
-.empty-state p{font-size:.88rem;line-height:1.6}
-
-/* ============================================================
-   MODAL / OVERLAY
-============================================================ */
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.65);
-  backdrop-filter:blur(6px);z-index:500;
-  display:none;align-items:center;justify-content:center;padding:20px;
-}
-.overlay.open{display:flex;animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{
-  background:var(--card);border:1px solid var(--border-hi);
-  border-radius:var(--r20);padding:28px;width:100%;max-width:540px;
-  box-shadow:0 20px 60px rgba(0,0,0,.7);
-  animation:slideUp .3s cubic-bezier(.22,.68,0,1.2);
-  max-height:90vh;overflow-y:auto;
-}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
-.modal-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--border);
-}
-.modal-hd h3{font-family:'Fraunces',serif;font-size:1.1rem}
-.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;padding:4px;line-height:1;transition:color var(--t)}
-.modal-close:hover{color:var(--text)}
-.m-field{margin-bottom:14px}
-.m-field label{
-  display:block;font-size:.69rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.8px;color:var(--subtle);margin-bottom:6px;
-}
-.m-field input,.m-field select,.m-field textarea{
-  width:100%;padding:10px 13px;
-  background:rgba(0,0,0,.3);border:1px solid var(--border);
-  border-radius:var(--r8);color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:.87rem;outline:none;
-  transition:border-color var(--t),box-shadow var(--t);
-}
-.m-field input:focus,.m-field select:focus,.m-field textarea:focus{
-  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);
-}
-.m-field textarea{resize:vertical;min-height:90px;line-height:1.5}
-.m-field select option{background:var(--card)}
-.m-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-
-/* ============================================================
-   SEARCH & FILTER CHIPS
-============================================================ */
-.search-wrap{position:relative;margin-bottom:16px;flex-shrink:0}
-.search-wrap input{
-  width:100%;padding:10px 14px 10px 40px;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r12);color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;
-  transition:border-color var(--t),box-shadow var(--t);
-}
-.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.95rem;pointer-events:none}
-.filter-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;flex-shrink:0}
-.filter-chip{
-  padding:5px 14px;border-radius:100px;font-size:.75rem;font-weight:600;
-  background:var(--surface);border:1px solid var(--border);
-  color:var(--subtle);cursor:pointer;transition:all var(--t);font-family:'DM Sans',sans-serif;
-}
-.filter-chip:hover{border-color:var(--border-hi);color:var(--text)}
-.filter-chip.on{background:rgba(0,200,150,.12);border-color:var(--accent);color:var(--accent)}
-
-/* ============================================================
-   AI CHAT PAGE
-   FIX: no hardcoded height — uses flex:1 in the flex column
-        parent (.main-content) to fill remaining space.
-============================================================ */
-#pageAI{
-  /* FIX: display:none by default; JS sets display:'flex' explicitly */
-  display:none;
-  flex-direction:column;
-  /* FIX: flex:1 fills all remaining height in .main-content flex column */
-  flex:1;
-  min-height:0;   /* required: allows flex child to shrink below content size */
-  gap:0;
-}
-
-/* Chat outer container */
-.chat-outer{
-  display:flex;flex-direction:column;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r20);overflow:hidden;
-  flex:1;min-height:0;           /* fills remaining height in #pageAI */
-  box-shadow:0 8px 40px rgba(0,0,0,.3);
-  margin-top:0;
-}
-
-/* Header strip */
-.chat-top{
-  display:flex;align-items:center;gap:14px;
-  padding:14px 20px;background:var(--surface);
-  border-bottom:1px solid var(--border);flex-shrink:0;
-}
-.chat-ai-avatar{
-  width:40px;height:40px;border-radius:12px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:grid;place-items:center;font-size:1.2rem;
-  box-shadow:0 0 20px var(--accent-glow);
-  animation:ai-glow 3s ease-in-out infinite;
-}
-@keyframes ai-glow{
-  0%,100%{box-shadow:0 0 14px var(--accent-glow)}
-  50%{box-shadow:0 0 30px var(--accent-glow),0 0 8px var(--accent)}
-}
-.chat-top-info{flex:1}
-.chat-top-name{font-family:'Fraunces',serif;font-weight:700;font-size:.98rem;color:var(--text)}
-.chat-online{font-size:.72rem;color:var(--success);display:flex;align-items:center;gap:5px;margin-top:2px}
-.online-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:blink-g 2s ease-in-out infinite}
-@keyframes blink-g{0%,100%{opacity:1}50%{opacity:.25}}
-.chat-clear-btn{
-  background:none;border:1px solid var(--border);color:var(--muted);
-  border-radius:var(--r8);padding:6px 12px;font-size:.74rem;
-  font-family:'DM Sans',sans-serif;cursor:pointer;transition:all var(--t);
-}
-.chat-clear-btn:hover{border-color:var(--border-hi);color:var(--text)}
-
-/* Messages scroll area */
-.chat-messages{
-  flex:1;overflow-y:auto;
-  padding:20px;display:flex;flex-direction:column;gap:14px;
-  scroll-behavior:smooth;
-  /* FIX: min-height:0 prevents overflow */
-  min-height:0;
-}
-.chat-messages::-webkit-scrollbar{width:4px}
-.chat-messages::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:4px}
-
-/* Message bubbles */
-.msg{display:flex;align-items:flex-end;gap:10px;animation:msgIn .3s cubic-bezier(.22,.68,0,1.2)}
-@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.msg.user{flex-direction:row-reverse}
-.msg-avatar{
-  width:30px;height:30px;border-radius:9px;flex-shrink:0;
-  display:grid;place-items:center;font-size:.85rem;
-  background:var(--surface);border:1px solid var(--border);
-}
-.msg.ai .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none}
-.msg-bubble{
-  max-width:72%;padding:11px 15px;border-radius:16px;
-  font-size:.87rem;line-height:1.6;word-break:break-word;
-}
-.msg.ai  .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
-.msg.user .msg-bubble{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-bottom-right-radius:4px}
-.msg-time{font-size:.65rem;color:var(--muted);margin-top:5px}
-.msg.user .msg-time{text-align:right}
-
-/* Typing indicator */
-.typing-wrap{display:flex;align-items:center;gap:5px;padding:10px 14px}
-.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:td .9s ease-in-out infinite}
-.typing-dot:nth-child(2){animation-delay:.15s}
-.typing-dot:nth-child(3){animation-delay:.3s}
-@keyframes td{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px);background:var(--accent)}}
-
-/* Welcome screen */
-.chat-welcome{
-  display:flex;flex-direction:column;align-items:center;
-  text-align:center;padding:28px 20px;gap:14px;color:var(--subtle);
-  margin:auto 0;
-}
-.chat-welcome-icon{
-  width:64px;height:64px;border-radius:20px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:grid;place-items:center;font-size:1.8rem;
-  box-shadow:0 8px 32px var(--accent-glow);
-}
-.chat-welcome h3{font-family:'Fraunces',serif;font-size:1.2rem;color:var(--text)}
-.chat-welcome p{font-size:.84rem;line-height:1.6;max-width:360px}
-
-/* Suggestion chips */
-.chat-suggestions{
-  display:flex;flex-wrap:wrap;gap:8px;
-  padding:10px 18px;border-top:1px solid var(--border);flex-shrink:0;
-}
-.sugg-chip{
-  padding:6px 14px;border-radius:100px;font-size:.74rem;font-weight:500;
-  background:var(--surface);border:1px solid var(--border);
-  color:var(--subtle);cursor:pointer;transition:all var(--t);
-  font-family:'DM Sans',sans-serif;white-space:nowrap;
-}
-.sugg-chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,200,150,.08)}
-
-/* Input bar */
-.chat-input-bar{
-  display:flex;align-items:flex-end;gap:10px;
-  padding:12px 16px;background:var(--surface);
-  border-top:1px solid var(--border);flex-shrink:0;
-}
-#chatInput{
-  flex:1;padding:10px 16px;
-  background:rgba(0,0,0,.3);border:1px solid var(--border);
-  border-radius:12px;color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;
-  resize:none;line-height:1.5;max-height:120px;overflow-y:auto;
-  transition:border-color var(--t),box-shadow var(--t);
-  scrollbar-width:none;
-}
-#chatInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-#chatInput::placeholder{color:var(--muted)}
-.chat-send-btn{
-  width:42px;height:42px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  border:none;border-radius:11px;display:grid;place-items:center;cursor:pointer;
-  transition:all var(--t-spring);font-size:1rem;
-  box-shadow:0 4px 16px var(--accent-glow);
-}
-.chat-send-btn:hover{transform:scale(1.08)}
-.chat-send-btn:active{transform:scale(.95)}
-.chat-send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none !important}
-
-/* ============================================================
-   THEME FAB & PANEL
-============================================================ */
-.theme-fab{
-  position:fixed;bottom:24px;right:24px;width:48px;height:48px;
-  background:var(--card);border:1px solid var(--border-hi);border-radius:50%;
-  display:grid;place-items:center;font-size:1.15rem;cursor:pointer;
-  box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:999;
-  transition:all var(--t-spring);
-}
-.theme-fab:hover{transform:scale(1.12) rotate(15deg);border-color:var(--accent)}
-.theme-panel{
-  position:fixed;bottom:82px;right:24px;width:272px;
-  background:var(--surface);border:1px solid var(--border-hi);
-  border-radius:18px;padding:20px;
-  box-shadow:0 12px 48px rgba(0,0,0,.55);
-  z-index:998;opacity:0;pointer-events:none;
-  transform:translateY(12px) scale(.97);transition:all var(--t);
-}
-.theme-panel.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
-.theme-panel h4{
-  font-size:.64rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;
-}
-.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px}
-.theme-btn{
-  background:var(--card);border:1px solid var(--border);
-  padding:7px 6px;border-radius:8px;color:var(--text);
-  font-size:.74rem;font-family:'DM Sans',sans-serif;
-  cursor:pointer;transition:all var(--t);font-weight:500;
-}
-.theme-btn:hover{border-color:var(--accent)}
-.theme-btn.active-theme{border-color:var(--accent);color:var(--accent)}
-.color-wheel-wrapper{
-  width:100%;aspect-ratio:1;border-radius:50%;
-  background:conic-gradient(
-    hsl(0,100%,50%),hsl(45,100%,50%),hsl(90,100%,50%),
-    hsl(135,100%,50%),hsl(180,100%,50%),hsl(225,100%,50%),
-    hsl(270,100%,50%),hsl(315,100%,50%),hsl(360,100%,50%)
-  );
-  position:relative;cursor:crosshair;
-  box-shadow:inset 0 0 0 4px rgba(0,0,0,.2),0 4px 16px rgba(0,0,0,.3);
-}
-.color-ball{
-  width:18px;height:18px;background:#fff;border:3px solid #000;
-  border-radius:50%;position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);pointer-events:none;
-  box-shadow:0 2px 6px rgba(0,0,0,.5);
-}
-
-/* ============================================================
-   SKELETON LOADER
-============================================================ */
-.skeleton{
-  background:linear-gradient(90deg,var(--border) 25%,var(--border-hi) 50%,var(--border) 75%);
-  background-size:400% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:6px;
-}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-
-/* ============================================================
-   RESPONSIVE
-============================================================ */
-@media(max-width:768px){
-  .sidebar{display:none}
-  .stat-row{grid-template-columns:1fr 1fr}
-  .main-content{padding:18px 16px 24px}
-  .m-row2{grid-template-columns:1fr}
-  .chat-suggestions{display:none}  /* hide chips on small screens */
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -920,19 +241,27 @@ a{color:var(--accent);text-decoration:none}
     </div>
 
     <!-- ══════════ PAGE: EXPLORE ══════════ -->
-    <div id="pageExplore" style="display:none">
-      <div class="page-header">
-        <h1 class="pg-title">Explore Tickets</h1>
-        <p class="pg-sub">Browse and upvote community queries</p>
-      </div>
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" placeholder="Search all tickets…"/>
-      </div>
-      <div id="exploreList">
-        <div class="empty-state"><div class="es-icon">🌐</div><p>Loading community tickets…</p></div>
-      </div>
-    </div>
+   <!-- ══════════ PAGE: EXPLORE ══════════ -->
+<div id="pageExplore" style="display:none">
+  <div class="page-header">
+    <h1 class="pg-title">Explore Tickets 🌐</h1>
+    <p class="pg-sub">Browse and upvote community queries from all students</p>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="exploreSearch" placeholder="Search all tickets…" oninput="renderExplore()"/>
+  </div>
+  <div class="filter-row" style="margin-bottom:16px">
+    <button class="filter-chip on" data-ex-filter="all"       onclick="setExFilter('all',this)">All</button>
+    <button class="filter-chip"   data-ex-filter="academic"   onclick="setExFilter('academic',this)">📚 Academic</button>
+    <button class="filter-chip"   data-ex-filter="technical"  onclick="setExFilter('technical',this)">💻 Technical</button>
+    <button class="filter-chip"   data-ex-filter="finance"    onclick="setExFilter('finance',this)">💰 Finance</button>
+    <button class="filter-chip"   data-ex-filter="admin"      onclick="setExFilter('admin',this)">🏛️ Admin</button>
+  </div>
+  <div id="exploreList">
+    <div class="empty-state"><div class="es-icon">🌐</div><p>Loading community tickets…</p></div>
+  </div>
+</div>
 
     <!-- ══════════ PAGE: SETTINGS ══════════ -->
     <div id="pageSettings" style="display:none">
@@ -980,6 +309,192 @@ a{color:var(--accent);text-decoration:none}
         <button class="btn btn-danger" onclick="logout()">Sign Out of All Sessions</button>
       </div>
     </div>
+  <!-- ══════════ PAGE: ASSIGNED ══════════ -->
+<div id="pageAssigned" style="display:none">
+
+  <div class="page-header">
+    <h1 class="pg-title">Assigned Tickets</h1>
+    <p class="pg-sub">Tickets currently assigned to you</p>
+  </div>
+
+  <div class="stat-row">
+
+    <div class="stat-card">
+      <div class="stat-icon">📋</div>
+      <div class="stat-val">12</div>
+      <div class="stat-label">Assigned</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val">4</div>
+      <div class="stat-label">Pending</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val">8</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-val">91%</div>
+      <div class="stat-label">Efficiency</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ══════════ PAGE: ANALYTICS ══════════ -->
+<div id="pageAnalytics" style="display:none">
+
+  <div class="page-header">
+    <h1 class="pg-title">Analytics Dashboard</h1>
+    <p class="pg-sub">Performance and ticket statistics overview</p>
+  </div>
+
+  <div class="stat-row">
+
+    <div class="stat-card">
+      <div class="stat-icon">🎫</div>
+      <div class="stat-val">245</div>
+      <div class="stat-label">Total Tickets</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val">198</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-val">81%</div>
+      <div class="stat-label">Resolution Rate</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ══════════ PAGE: ALL TICKETS ══════════ -->
+<!-- ══════════ PAGE: ALL TICKETS ══════════ -->
+<div id="pageAll_tickets" style="display:none">
+
+  <div class="page-header">
+    <h1 class="pg-title">All Tickets 🗂️</h1>
+    <p class="pg-sub">Manage and respond to tickets across all departments</p>
+  </div>
+
+  <!-- Live stats -->
+  <div class="stat-row">
+    <div class="stat-card" style="--stat-c:var(--accent)">
+      <div class="stat-icon">🎫</div>
+      <div class="stat-val" id="atStatTotal">—</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-card" style="--stat-c:var(--warning)">
+      <div class="stat-icon">🔓</div>
+      <div class="stat-val" id="atStatOpen">—</div>
+      <div class="stat-label">Open</div>
+    </div>
+    <div class="stat-card" style="--stat-c:var(--info)">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val" id="atStatInProg">—</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card" style="--stat-c:var(--success)">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val" id="atStatResolved">—</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div><h3>All Submitted Tickets</h3><p>Click a ticket to view details or update its status</p></div>
+      <button class="btn btn-o btn-sm" onclick="loadAllTickets()">🔄 Refresh</button>
+    </div>
+
+    <!-- Search + Filter -->
+    <div class="search-wrap" style="margin-bottom:12px">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="atSearch" placeholder="Search by title, user or category…" oninput="renderAllTickets()"/>
+    </div>
+    <div class="filter-row" style="margin-bottom:16px">
+      <button class="filter-chip on" data-at-filter="all"         onclick="setAtFilter('all',this)">All</button>
+      <button class="filter-chip"   data-at-filter="open"        onclick="setAtFilter('open',this)">Open</button>
+      <button class="filter-chip"   data-at-filter="in_progress" onclick="setAtFilter('in_progress',this)">In Progress</button>
+      <button class="filter-chip"   data-at-filter="resolved"    onclick="setAtFilter('resolved',this)">Resolved</button>
+      <button class="filter-chip"   data-at-filter="closed"      onclick="setAtFilter('closed',this)">Closed</button>
+    </div>
+
+    <div id="allTicketsList">
+      <div class="empty-state"><div class="es-icon">⏳</div><p>Loading tickets…</p></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ PAGE: USERS ══════════ -->
+<!-- ══════════ PAGE: USERS ══════════ -->
+<div id="pageUsers" style="display:none">
+
+  <div class="page-header">
+    <h1 class="pg-title">Users Management 👥</h1>
+    <p class="pg-sub">View, search, and manage all registered users</p>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card" style="--stat-c:var(--accent)">
+      <div class="stat-icon">👨‍🎓</div>
+      <div class="stat-val" id="uStatStudents">—</div>
+      <div class="stat-label">Students</div>
+    </div>
+    <div class="stat-card" style="--stat-c:var(--info)">
+      <div class="stat-icon">👨‍🏫</div>
+      <div class="stat-val" id="uStatTeachers">—</div>
+      <div class="stat-label">Teachers</div>
+    </div>
+    <div class="stat-card" style="--stat-c:var(--warning)">
+      <div class="stat-icon">🔑</div>
+      <div class="stat-val" id="uStatHods">—</div>
+      <div class="stat-label">HODs</div>
+    </div>
+    <div class="stat-card" style="--stat-c:var(--danger)">
+      <div class="stat-icon">🏛️</div>
+      <div class="stat-val" id="uStatAdmins">—</div>
+      <div class="stat-label">Admins</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div><h3>Registered Users</h3><p>All accounts in the system</p></div>
+      <button class="btn btn-o btn-sm" onclick="loadUsers()">🔄 Refresh</button>
+    </div>
+
+    <div class="search-wrap" style="margin-bottom:12px">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="uSearch" placeholder="Search by name, email or role…" oninput="renderUsers()"/>
+    </div>
+    <div class="filter-row" style="margin-bottom:16px">
+      <button class="filter-chip on" data-u-filter="all"     onclick="setUFilter('all',this)">All</button>
+      <button class="filter-chip"   data-u-filter="student"  onclick="setUFilter('student',this)">Students</button>
+      <button class="filter-chip"   data-u-filter="teacher"  onclick="setUFilter('teacher',this)">Teachers</button>
+      <button class="filter-chip"   data-u-filter="hod"      onclick="setUFilter('hod',this)">HODs</button>
+      <button class="filter-chip"   data-u-filter="admin"    onclick="setUFilter('admin',this)">Admins</button>
+    </div>
+
+    <div id="usersList">
+      <div class="empty-state"><div class="es-icon">⏳</div><p>Loading users…</p></div>
+    </div>
+  </div>
+</div>
 
   </main><!-- /.main-content -->
 </div><!-- /.app-body -->
@@ -1068,6 +583,7 @@ a{color:var(--accent);text-decoration:none}
      JAVASCRIPT
 ═══════════════════════════════════════════════ -->
 <script>
+  
 /* ── Config & utilities ──────────────────────────────── */
 const API_BASE = (window.API_BASE || 'http://localhost:5000') + '/api';
 
@@ -1157,7 +673,7 @@ const DEMO_TICKETS = [
 
 async function loadTickets() {
   try {
-    const data = await apiCall('/tokens/my');
+    const data = await  apiCall('/tickets/') ;
     allTickets = data?.tokens || data || [];
   } catch(_) {
     allTickets = DEMO_TICKETS;
@@ -1236,12 +752,210 @@ function setFilter(f, btn) {
   renderMyTickets();
 }
 
-function openTicket(id) {
+// ✅ REPLACE WITH — proper modal
+/* ================================================================
+   PASTE THIS ENTIRE BLOCK INTO dashboard.html
+   Replace the existing openTicket() function with this one,
+   and ADD the postReply() function below it.
+================================================================ */
+
+// ── Open ticket detail modal ──────────────────────────────────
+async function openTicket(id) {
   const t = allTickets.find(x => x.id === id);
   if (!t) return;
-  alert(`Ticket #${id}\n\nTitle: ${t.title}\nStatus: ${t.status}\nSchool: ${t.school || '—'}`);
+
+  const SC  = { open:'pl-open', in_progress:'pl-in_progress', resolved:'pl-resolved', closed:'pl-closed' };
+  const overlay = document.getElementById('newTicketOverlay');
+  const modal   = overlay.querySelector('.modal');
+
+  // Determine if current user is staff
+  const isStaff = ['teacher','admin','hod'].includes(currentUser?.role);
+
+  // Render skeleton first, then load replies
+  modal.innerHTML = `
+    <div class="modal-hd">
+      <h3>🎫 Ticket #${t.id}</h3>
+      <button class="modal-close" onclick="closeNewTicket()">✕</button>
+    </div>
+
+    <!-- Title & Description -->
+    <div style="display:flex;flex-direction:column;gap:14px;font-size:.88rem">
+
+      <div>
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:5px">Title</div>
+        <div style="color:var(--text);font-weight:600;font-size:.96rem">${escapeHTML(t.title || '—')}</div>
+      </div>
+
+      <div>
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:5px">Description</div>
+        <div style="color:var(--text);line-height:1.7;background:rgba(0,0,0,.2);padding:12px;border-radius:8px;border:1px solid var(--border)">${escapeHTML(t.description || '—')}</div>
+      </div>
+
+      <!-- Meta row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:5px">Status</div>
+          <span class="pill ${SC[t.status] || 'pl-open'}" id="modalStatusPill">${escapeHTML((t.status || 'open').replace('_',' '))}</span>
+        </div>
+        <div>
+          <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:5px">Department</div>
+          <span style="color:var(--text)">${escapeHTML(t.department || '—')}</span>
+        </div>
+        <div>
+          <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:5px">Upvotes</div>
+          <span style="color:var(--accent);font-weight:700">⬆ ${t.upvote_count || t.upvotes || 0}</span>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:5px">Raised on</div>
+        <div style="color:var(--muted);font-size:.8rem">${t.created_at ? new Date(t.created_at).toLocaleString('en-IN') : '—'}</div>
+      </div>
+
+      <!-- Divider -->
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:10px">💬 Replies from Staff</div>
+
+        <!-- Replies list — loaded via fetch -->
+        <div id="repliesContainer" style="display:flex;flex-direction:column;gap:10px;min-height:48px">
+          <div style="color:var(--muted);font-size:.82rem">Loading replies…</div>
+        </div>
+      </div>
+
+      <!-- Staff reply box -->
+      ${isStaff ? `
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtle);margin-bottom:8px">✍️ Write a Reply</div>
+        <textarea id="replyText"
+          placeholder="Type your answer or update here…"
+          style="width:100%;padding:10px 13px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.86rem;min-height:90px;resize:vertical;outline:none;line-height:1.6;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"></textarea>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--subtle);cursor:pointer">
+            <input type="checkbox" id="resolveCheck" style="accent-color:var(--accent)"/>
+            Mark ticket as Resolved
+          </label>
+          <div style="flex:1"></div>
+          <button class="btn btn-o btn-sm" onclick="closeNewTicket()">Cancel</button>
+          <button class="btn btn-p btn-sm" id="replySubmitBtn" onclick="postReply(${t.id})">Send Reply</button>
+        </div>
+
+        <div id="replyNotice" style="margin-top:8px"></div>
+      </div>
+      ` : `
+      <!-- Student: show message if no replies yet -->
+      <div id="noReplyMsg" style="display:none;color:var(--muted);font-size:.82rem;font-style:italic">
+        No staff reply yet. Your ticket is being reviewed.
+      </div>
+      `}
+
+    </div>`;
+
+  overlay.classList.add('open');
+
+  // Load replies via API
+  try {
+    const replies = await apiCall(`/tokens/${t.id}/replies`);
+    const container = document.getElementById('repliesContainer');
+
+    if (!replies || replies.length === 0) {
+      container.innerHTML = `<div style="color:var(--muted);font-size:.82rem;font-style:italic;padding:10px 0">No replies yet.</div>`;
+      const noMsg = document.getElementById('noReplyMsg');
+      if (noMsg) noMsg.style.display = 'block';
+    } else {
+      container.innerHTML = replies.map(r => `
+        <div style="background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.15);border-radius:10px;padding:12px 14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:.8rem;flex-shrink:0">
+              ${r.author_role === 'admin' ? '🏛️' : r.author_role === 'hod' ? '🔑' : '👨‍🏫'}
+            </div>
+            <div>
+              <div style="font-weight:600;font-size:.84rem;color:var(--text)">${escapeHTML(r.author_name)}</div>
+              <div style="font-size:.68rem;color:var(--accent);text-transform:capitalize">${escapeHTML(r.author_role)}</div>
+            </div>
+            <div style="margin-left:auto;font-size:.7rem;color:var(--muted)">${new Date(r.created_at).toLocaleString('en-IN')}</div>
+          </div>
+          <div style="color:var(--text);font-size:.86rem;line-height:1.6">${escapeHTML(r.message)}</div>
+        </div>`).join('');
+    }
+  } catch(e) {
+    document.getElementById('repliesContainer').innerHTML =
+      `<div style="color:var(--danger);font-size:.82rem">Could not load replies.</div>`;
+  }
 }
 
+
+// ── Post a reply (staff only) ─────────────────────────────────
+async function postReply(tokenId) {
+  const message = (document.getElementById('replyText')?.value || '').trim();
+  const resolve = document.getElementById('resolveCheck')?.checked || false;
+  const notice  = document.getElementById('replyNotice');
+  const btn     = document.getElementById('replySubmitBtn');
+
+  if (!message) {
+    notice.innerHTML = `<span style="color:var(--danger);font-size:.8rem">⚠️ Please write a reply before sending.</span>`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    await apiCall(`/tokens/${tokenId}/replies`, 'POST', { message, resolve });
+
+    notice.innerHTML = `<span style="color:var(--success);font-size:.8rem">✅ Reply sent successfully!</span>`;
+
+    // Update ticket status in local state if resolved
+    if (resolve) {
+      const t = allTickets.find(x => x.id === tokenId);
+      if (t) {
+        t.status = 'resolved';
+        renderStats();
+        renderRecent();
+        renderMyTickets();
+      }
+      // Update pill in modal
+      const pill = document.getElementById('modalStatusPill');
+      if (pill) {
+        pill.className = 'pill pl-resolved';
+        pill.textContent = 'resolved';
+      }
+    }
+
+    // Reload replies in modal
+    const replies = await apiCall(`/tokens/${tokenId}/replies`);
+    const container = document.getElementById('repliesContainer');
+    if (container && replies?.length) {
+      container.innerHTML = replies.map(r => `
+        <div style="background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.15);border-radius:10px;padding:12px 14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:.8rem;flex-shrink:0">
+              ${r.author_role === 'admin' ? '🏛️' : r.author_role === 'hod' ? '🔑' : '👨‍🏫'}
+            </div>
+            <div>
+              <div style="font-weight:600;font-size:.84rem;color:var(--text)">${escapeHTML(r.author_name)}</div>
+              <div style="font-size:.68rem;color:var(--accent);text-transform:capitalize">${escapeHTML(r.author_role)}</div>
+            </div>
+            <div style="margin-left:auto;font-size:.7rem;color:var(--muted)">${new Date(r.created_at).toLocaleString('en-IN')}</div>
+          </div>
+          <div style="color:var(--text);font-size:.86rem;line-height:1.6">${escapeHTML(r.message)}</div>
+        </div>`).join('');
+    }
+
+    // Clear reply box
+    const ta = document.getElementById('replyText');
+    if (ta) ta.value = '';
+    btn.textContent = 'Send Reply';
+    btn.disabled = false;
+
+  } catch(e) {
+    notice.innerHTML = `<span style="color:var(--danger);font-size:.8rem">⚠️ ${escapeHTML(e.message || 'Failed to send reply')}</span>`;
+    btn.disabled = false;
+    btn.textContent = 'Send Reply';
+  }
+}
 async function upvote(id, btn) {
   btn.classList.toggle('voted');
   const t = allTickets.find(x => x.id === id); if (!t) return;
@@ -1286,29 +1000,56 @@ function showNotice(id, msg, type) {
 async function submitTicket() {
   const title  = document.getElementById('tkTitle')?.value.trim();
   const desc   = document.getElementById('tkDesc')?.value.trim();
-  const cat    = document.getElementById('tkCat')?.value;
-  const school = document.getElementById('tkSchool')?.value;
-  const pri    = document.getElementById('tkPriority')?.value;
 
-  if (!title) { showNotice('tkNotice', 'Please enter a subject for your ticket.', 'err'); return; }
-  if (!desc)  { showNotice('tkNotice', 'Please describe your issue.', 'err');              return; }
-  if (!cat)   { showNotice('tkNotice', 'Select a category.',          'err');              return; }
+  // ✅ Validation
+  if (!title) {
+    showNotice('tkNotice', 'Please enter a subject for your ticket.', 'err');
+    return;
+  }
+  if (!desc) {
+    showNotice('tkNotice', 'Please describe your issue.', 'err');
+    return;
+  }
 
-  const body = { title: title.slice(0,200), description: desc.slice(0,2000), category: cat, school, priority: pri || 'normal' };
-  const btn  = document.getElementById('tkSubmitBtn');
-  btn.disabled = true; btn.textContent = 'Submitting…';
+  // ✅ FINAL BODY (MATCHES BACKEND)
+  const body = {
+    title: title.slice(0, 200),
+    description: desc.slice(0, 2000),
+    level: "university"   // 🔥 REQUIRED FIELD
+  };
+
+  const btn = document.getElementById('tkSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
 
   try {
-    const res = await apiCall('/tokens', 'POST', body);
-    showNotice('tkNotice', 'Ticket raised successfully!', 'ok');
-    const newTk = { id: res?.id || Date.now(), ...body, status: 'open', upvotes: 0, created_at: new Date().toISOString() };
+    const res = await apiCall('/tokens/', 'POST', body);
+
+    showNotice('tkNotice', '✅ Ticket raised successfully!', 'ok');
+
+    // ✅ Add ticket locally (UI update)
+    const newTk = {
+      id: res?.id || Date.now(),
+      ...body,
+      status: 'open',
+      upvotes: 0,
+      created_at: new Date().toISOString()
+    };
+
     allTickets.unshift(newTk);
-    renderStats(); renderRecent(); renderMyTickets();
+
+    renderStats();
+    renderRecent();
+    renderMyTickets();
+
     document.getElementById('sbTicketCount').textContent = allTickets.length;
-    setTimeout(closeNewTicket, 1400);
-  } catch(e) {
-    showNotice('tkNotice', e.message, 'err');
-    btn.disabled = false; btn.textContent = 'Submit Ticket';
+
+    setTimeout(closeNewTicket, 1200);
+
+  } catch (e) {
+    showNotice('tkNotice', e.message || 'Something went wrong', 'err');
+    btn.disabled = false;
+    btn.textContent = 'Submit Ticket';
   }
 }
 
@@ -1318,12 +1059,17 @@ async function submitTicket() {
         class to override an existing inline style.
 ═══════════════════════════════════════════════════════ */
 const PAGES = {
-  ai        : 'pageAI',
-  dashboard : 'pageDashboard',
-  tickets   : 'pageTickets',
-  explore   : 'pageExplore',
-  settings  : 'pageSettings',
+  ai          : 'pageAI',
+  dashboard   : 'pageDashboard',
+  tickets     : 'pageTickets',
+  explore     : 'pageExplore',
+  settings    : 'pageSettings',
+  assigned    : 'pageAssigned',
+  analytics   : 'pageAnalytics',
+  all_tickets : 'pageAll_tickets',
+  users       : 'pageUsers',
 };
+
 const PAGE_LABELS = {
   ai:'AI Assistant', dashboard:'Dashboard', tickets:'My Tickets',
   explore:'Explore', settings:'Settings',
@@ -1356,6 +1102,9 @@ function showPage(name, btn) {
 
 
   if (name === 'ai') setTimeout(() => document.getElementById('chatInput')?.focus(), 80);
+  if (name === 'all_tickets') loadAllTickets();
+  if (name === 'users')       loadUsers();
+  if (name === 'explore')     loadExplore(); 
 }
 
 
@@ -1376,7 +1125,42 @@ function timeAgo(date) {
 }
 
 
-let aiTyping = false;
+/* ══════════════════════════════════════════════
+   CHAT — with history & direct Anthropic fallback
+══════════════════════════════════════════════ */
+let aiTyping      = false;
+let chatHistory   = [];   // stores {role, content} for multi-turn context
+
+const CU_SYSTEM = `You are the official Help Desk AI for Christ (Deemed to be University) NCR Campus, Ghaziabad.
+Address: Mariam Nagar, Meerut Road, Ghaziabad - 201003, Uttar Pradesh.
+Academic Year: 2026-27.
+
+You help current students, teachers and staff with:
+- Admissions & eligibility for UG/PG programmes
+- Fee structure & scholarships
+- Courses: BBA, BCA, BCom, BA LLB, BSc, MBA and more
+- Academic calendar, exam schedules & internal marks
+- LMS portal issues and timetables
+- Campus facilities: library, hostel, canteen, sports, Wi-Fi
+- Administrative processes: ID cards, bonafide certificates, NOCs
+- Semester registration and re-admission
+- Placement cell and internship queries
+
+Schools at NCR Campus:
+- School of Commerce, Finance & Accountancy
+- School of Business & Management
+- School of Law
+- School of Sciences
+- School of Social Sciences
+- School of Arts & Humanities
+
+Rules:
+- Always give a direct, helpful answer first. Never just say "contact us".
+- Use bullet points for lists of 3 or more items.
+- Keep answers concise: 3-6 sentences or bullet points.
+- For very specific queries (exact fee amounts, specific dates), answer what you know then suggest: "For exact details, please raise a support ticket above."
+- Be warm and friendly — students are often stressed.
+- Never make up specific names of staff or phone numbers.`;
 
 function autoResize(el) {
   el.style.height = 'auto';
@@ -1395,21 +1179,27 @@ function sendSuggestion(text) {
 }
 
 function appendMsg(role, text) {
-  const msgs = document.getElementById('chatMessages');
-  // Hide welcome screen on first message
+  const msgs    = document.getElementById('chatMessages');
   const welcome = document.getElementById('chatWelcome');
   if (welcome) welcome.style.display = 'none';
-  // Also hide suggestion chips
   document.getElementById('chatSuggestions').style.display = 'none';
 
   const time = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
   const av   = role === 'ai' ? '🤖' : (currentUser?.name?.[0]?.toUpperCase() || 'U');
   const div  = document.createElement('div');
   div.className = `msg ${role}`;
+
+  // Render markdown-lite: **bold**, bullet lines, newlines
+  const formatted = escapeHTML(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^[-•]\s(.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul style="margin:6px 0 6px 16px;padding:0">$1</ul>')
+    .replace(/\n/g, '<br>');
+
   div.innerHTML = `
     <div class="msg-avatar">${av}</div>
     <div>
-      <div class="msg-bubble">${escapeHTML(text).replace(/\n/g, '<br>')}</div>
+      <div class="msg-bubble">${formatted}</div>
       <div class="msg-time">${time}</div>
     </div>`;
   msgs.appendChild(div);
@@ -1448,28 +1238,75 @@ async function sendChatMessage() {
   input.style.height = 'auto';
   appendMsg('user', text);
 
+  // Add to history
+  chatHistory.push({ role: 'user', content: text });
+  // Keep last 10 turns to avoid token bloat
+  if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
   aiTyping = true;
   document.getElementById('chatSendBtn').disabled = true;
   showTyping();
 
+  // ── Layer 1: Try your backend ──────────────────
   try {
     const data = await apiCall('/chatbot/', 'POST', { message: text });
-    removeTyping();
-    appendMsg('ai', data?.reply || "I'm not sure about that 🤔. Try raising a support ticket for further help.");
-  } catch(e) {
-    removeTyping();
-    const msg = (e.message || '').includes('401')
-      ? 'Session expired. Please log in again.'
-      : 'Sorry, the AI is currently unavailable. Please try again or raise a ticket.';
-    appendMsg('ai', msg);
-  } finally {
-    aiTyping = false;
-    document.getElementById('chatSendBtn').disabled = false;
-    document.getElementById('chatInput').focus();
+    const reply = data?.reply || data?.message || data?.response;
+    if (reply && reply.length > 10) {
+      removeTyping();
+      chatHistory.push({ role: 'assistant', content: reply });
+      appendMsg('ai', reply);
+      aiTyping = false;
+      document.getElementById('chatSendBtn').disabled = false;
+      document.getElementById('chatInput').focus();
+      return;
+    }
+    throw new Error('empty');
+  } catch(_) {
+    // Backend failed or empty — fall through to direct API
   }
+}
+  // ── Layer 2: Direct Anthropic API ─────────────
+// Layer 2: Smart local fallback (free, always works)
+  removeTyping();
+  appendMsg('ai', _tfidfFallback(text));
+  aiTyping = false;
+  document.getElementById('chatSendBtn').disabled = false;
+  document.getElementById('chatInput').focus();
+// ── Layer 3: Hardcoded smart fallback ─────────────────────────────────────
+// mirrors your TF-IDF CSV topics so the bot is never totally silent
+const _FAQ = [
+  { keys:['admission','apply','enroll','join','2026','2027'],
+    ans:`**Admissions 2026-27** are open for Christ University NCR Campus!\n\n- Visit **ncr.christuniversity.in** to apply online\n- Fill the application form and pay the registration fee\n- Shortlisted candidates are called for CUET / personal interview\n- Offer letters are issued within 2 weeks of interview\n\nFor exact dates, raise a ticket and our admissions team will respond.` },
+  { keys:['fee','fees','cost','tuition','payment','hostel charge'],
+    ans:`Fee structures vary by programme:\n\n- **BBA / BCom / BA** – approx ₹80,000–₹1,00,000 per year\n- **BCA / BSc** – approx ₹90,000–₹1,10,000 per year\n- **BA LLB (Hons)** – approx ₹1,20,000 per year\n- **MBA** – approx ₹1,50,000–₹1,80,000 per year\n\nExact figures: check the official portal or raise a Finance ticket.` },
+  { keys:['course','programme','bba','bca','bcom','law','mba','msc','ba','bsc'],
+    ans:`**Programmes at NCR Campus:**\n\n- School of Business & Management: BBA, MBA\n- School of Commerce: BCom (Hons), MCom\n- School of Sciences: BCA, BSc\n- School of Law: BA LLB (Hons), BBA LLB\n- School of Arts: BA Economics, BA Psychology\n- School of Social Sciences: BSW\n\nAll programmes are UGC recognised. Visit ncr.christuniversity.in for full details.` },
+  { keys:['lms','portal','login','access','website','online'],
+    ans:`**LMS Portal Issues:**\n\n- URL: **lms.christuniversity.in**\n- Use your university email and system-generated password\n- If login fails, clear browser cache or try incognito mode\n- Password reset: contact the IT helpdesk or raise a Technical ticket\n- Mobile app: search "Christ University" on Play Store / App Store` },
+  { keys:['exam','schedule','timetable','internal','end sem','semester'],
+    ans:`**Exam & Timetable info:**\n\n- Internal Assessment dates are posted on the LMS notice board\n- End Semester Exam schedules are shared 3 weeks before exams\n- Check your department notice board or the LMS portal for the latest timetable\n- For discrepancies in marks, raise an Academic ticket immediately.` },
+  { keys:['scholarship','financial aid','waiver','merit'],
+    ans:`**Scholarships available:**\n\n- Merit scholarship for students scoring 90%+ in qualifying exam\n- Government SC/ST/OBC scholarships (NSP portal)\n- Sports quota fee waiver for state/national level athletes\n- EWS scholarship for economically weaker sections\n\nApply through the Scholarship Cell in the Admin block or raise a Finance ticket.` },
+  { keys:['hostel','accommodation','room','pg','stay'],
+    ans:`**Hostel & Accommodation:**\n\n- On-campus hostel available for boys and girls separately\n- Fee: approx ₹70,000–₹90,000 per year (room + meals)\n- Apply during admission; seats are limited\n- Off-campus PG options are also available near Mariam Nagar\n\nRaise an Admin ticket for hostel allotment queries.` },
+  { keys:['library','book','issue','return','catalogue'],
+    ans:`**Central Library:**\n\n- Open Monday–Saturday, 8 AM – 8 PM\n- Students can borrow up to 3 books for 14 days\n- Online catalogue: search on the LMS library portal\n- Digital resources: access JSTOR, Manupatra, SCC Online via campus network\n- Late return fine: ₹2 per day per book` },
+  { keys:['placement','job','internship','company','recruit','career'],
+    ans:`**Placement Cell:**\n\n- Active placement drives from Oct–March every year\n- Companies visiting: Deloitte, KPMG, Wipro, TCS, Infosys and more\n- Average package: ₹3–6 LPA (varies by school)\n- For internship letters or placement queries, visit the Career Services office or raise a ticket.` },
+  { keys:['wifi','internet','network','connect','disconnect'],
+    ans:`**Campus Wi-Fi:**\n\n- Network name: **ChristNCR_Students**\n- Login with your university credentials\n- Coverage: all academic blocks, library, hostel common areas\n- If disconnecting frequently, raise a **Technical** ticket with your block & room number — our IT team resolves within 24 hrs.` },
+];
+
+function _tfidfFallback(msg) {
+  const q = msg.toLowerCase();
+  for (const faq of _FAQ) {
+    if (faq.keys.some(k => q.includes(k))) return faq.ans;
+  }
+  return `I'm here to help with Christ University NCR Campus queries! 🎓\n\nYou can ask me about:\n- **Admissions** & courses\n- **Fee structure** & scholarships\n- **LMS portal** & timetables\n- **Hostel**, library & campus facilities\n\nOr raise a **Support Ticket** above for personalised help from our staff.`;
 }
 
 function clearChat() {
+  chatHistory = [];
   const msgs = document.getElementById('chatMessages');
   msgs.innerHTML = `
     <div class="chat-welcome" id="chatWelcome">
@@ -1561,6 +1398,312 @@ document.addEventListener('keydown', e => {
 });
 
 init();
+/* ══════════════════════════════════════════════
+   ALL TICKETS (Admin)
+══════════════════════════════════════════════ */
+let allAdminTickets = [];
+let atFilter = 'all';
+
+const DEMO_ALL_TICKETS = [
+  { id:101, title:'Cannot access LMS portal',              status:'open',        category:'technical', department:'School of Sciences',                        created_at: new Date(Date.now()-3600000).toISOString(),  upvotes:7,  user_name:'Arjun Mehta'    },
+  { id:102, title:'Fee receipt missing after payment',     status:'in_progress', category:'finance',   department:'General / University-wide',                 created_at: new Date(Date.now()-7200000).toISOString(),  upvotes:14, user_name:'Priya Sharma'   },
+  { id:103, title:'Wrong marks entered for Internal 2',    status:'open',        category:'academic',  department:'School of Commerce, Finance & Accountancy', created_at: new Date(Date.now()-86400000).toISOString(), upvotes:22, user_name:'Rahul Verma'    },
+  { id:104, title:'Scholarship form link broken',          status:'resolved',    category:'admin',     department:'School of Business & Management',           created_at: new Date(Date.now()-172800000).toISOString(),upvotes:3,  user_name:'Sneha Iyer'     },
+  { id:105, title:'Library books not showing in portal',   status:'open',        category:'technical', department:'School of Law',                             created_at: new Date(Date.now()-259200000).toISOString(),upvotes:9,  user_name:'Dev Khanna'     },
+  { id:106, title:'Sports ground booking process unclear', status:'in_progress', category:'admin',     department:'General / University-wide',                 created_at: new Date(Date.now()-345600000).toISOString(),upvotes:5,  user_name:'Meera Nair'     },
+  { id:107, title:'Duplicate charge on hostel fee',        status:'resolved',    category:'finance',   department:'General / University-wide',                 created_at: new Date(Date.now()-432000000).toISOString(),upvotes:18, user_name:'Karan Patel'    },
+];
+
+async function loadAllTickets() {
+  document.getElementById('allTicketsList').innerHTML =
+    `<div class="empty-state"><div class="es-icon">⏳</div><p>Loading…</p></div>`;
+  try {
+    const data = await apiCall('/tickets/all');
+    allAdminTickets = Array.isArray(data) ? data : (data?.tickets || DEMO_ALL_TICKETS);
+  } catch(_) {
+    allAdminTickets = DEMO_ALL_TICKETS;
+  }
+  // Update stat counters
+  const total    = allAdminTickets.length;
+  const open     = allAdminTickets.filter(t => t.status === 'open').length;
+  const inProg   = allAdminTickets.filter(t => t.status === 'in_progress').length;
+  const resolved = allAdminTickets.filter(t => t.status === 'resolved').length;
+  ['atStatTotal','atStatOpen','atStatInProg','atStatResolved'].forEach((id,i) => {
+    animateCounter(id, [total,open,inProg,resolved][i]);
+  });
+  renderAllTickets();
+}
+
+function setAtFilter(f, btn) {
+  atFilter = f;
+  document.querySelectorAll('[data-at-filter]').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  renderAllTickets();
+}
+
+function renderAllTickets() {
+  const q   = (document.getElementById('atSearch')?.value || '').toLowerCase();
+  const list = document.getElementById('allTicketsList');
+  const SC   = { open:'pl-open', in_progress:'pl-in_progress', resolved:'pl-resolved', closed:'pl-closed' };
+  const IC   = { academic:'📚', admin:'🏛️', technical:'💻', finance:'💰', other:'💬' };
+
+  let f = allAdminTickets;
+  if (atFilter !== 'all') f = f.filter(t => t.status === atFilter);
+  if (q) f = f.filter(t =>
+    (t.title||'').toLowerCase().includes(q) ||
+    (t.user_name||'').toLowerCase().includes(q) ||
+    (t.category||'').toLowerCase().includes(q)
+  );
+
+  if (!f.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🔍</div><p>No tickets match.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = `<div class="tickets-list">${f.map(t => `
+    <div class="tk" onclick="openTicket(${t.id})" style="cursor:pointer">
+      <div class="tk-icon">${IC[t.category] || '💬'}</div>
+      <div class="tk-body">
+        <div class="tk-title">${escapeHTML(t.title || 'Untitled')}</div>
+        <div class="tk-meta">
+          <span class="pill ${SC[t.status] || 'pl-open'}">${escapeHTML((t.status||'open').replace('_',' '))}</span>
+          ${t.category ? `<span class="cat-pill cat-${t.category}">${escapeHTML(t.category)}</span>` : ''}
+          ${t.user_name ? `<span style="font-size:.72rem;color:var(--subtle)">👤 ${escapeHTML(t.user_name)}</span>` : ''}
+          ${t.created_at ? `<span class="tk-time">${timeAgo(new Date(t.created_at))}</span>` : ''}
+        </div>
+      </div>
+      <div class="tk-actions" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <select class="status-select" onclick="event.stopPropagation()"
+          onchange="adminUpdateStatus(${t.id}, this.value)"
+          style="font-size:.72rem;padding:3px 7px;border-radius:6px;background:rgba(0,0,0,.4);border:1px solid var(--border);color:var(--text);cursor:pointer">
+          <option value="open"        ${t.status==='open'?'selected':''}>Open</option>
+          <option value="in_progress" ${t.status==='in_progress'?'selected':''}>In Progress</option>
+          <option value="resolved"    ${t.status==='resolved'?'selected':''}>Resolved</option>
+          <option value="closed"      ${t.status==='closed'?'selected':''}>Closed</option>
+        </select>
+        <span style="font-size:.72rem;color:var(--accent)">⬆ ${t.upvotes||0}</span>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function adminUpdateStatus(id, newStatus) {
+  try {
+    await apiCall(`/tokens/${id}`, 'PATCH', { status: newStatus });
+    const t = allAdminTickets.find(x => x.id === id);
+    if (t) t.status = newStatus;
+    // Refresh stat counters
+    const open    = allAdminTickets.filter(t => t.status === 'open').length;
+    const inProg  = allAdminTickets.filter(t => t.status === 'in_progress').length;
+    const resolved= allAdminTickets.filter(t => t.status === 'resolved').length;
+    animateCounter('atStatOpen',     open);
+    animateCounter('atStatInProg',   inProg);
+    animateCounter('atStatResolved', resolved);
+  } catch(_) {
+    // silently fail — UI already updated optimistically
+  }
+}
+
+
+/* ══════════════════════════════════════════════
+   USERS (Admin)
+══════════════════════════════════════════════ */
+let allUsers = [];
+let uFilter = 'all';
+
+const DEMO_USERS = [
+  { id:1,  name:'Arjun Mehta',    email:'arjun.mehta@christuniversity.in',    role:'student', department:'School of Sciences',                        created_at:'2024-08-01' },
+  { id:2,  name:'Priya Sharma',   email:'priya.sharma@christuniversity.in',   role:'student', department:'School of Commerce, Finance & Accountancy', created_at:'2024-08-01' },
+  { id:3,  name:'Dr. Ramesh Rao', email:'ramesh.rao@christuniversity.in',     role:'teacher', department:'School of Sciences',                        created_at:'2024-07-15' },
+  { id:4,  name:'Dr. Leena Nair', email:'leena.nair@christuniversity.in',     role:'hod',     department:'School of Business & Management',           created_at:'2024-07-10' },
+  { id:5,  name:'Bhavishya',      email:'bhavishya@christuniversity.in',      role:'admin',   department:'Administration',                            created_at:'2024-06-01' },
+  { id:6,  name:'Sneha Iyer',     email:'sneha.iyer@christuniversity.in',     role:'student', department:'School of Law',                             created_at:'2024-08-02' },
+  { id:7,  name:'Karan Patel',    email:'karan.patel@christuniversity.in',    role:'student', department:'School of Arts & Humanities',               created_at:'2024-08-03' },
+  { id:8,  name:'Prof. Dev Roy',  email:'dev.roy@christuniversity.in',        role:'teacher', department:'School of Social Sciences',                 created_at:'2024-07-20' },
+];
+
+async function loadUsers() {
+  document.getElementById('usersList').innerHTML =
+    `<div class="empty-state"><div class="es-icon">⏳</div><p>Loading users…</p></div>`;
+  try {
+    const data = await apiCall('/users/');
+    allUsers = Array.isArray(data) ? data : (data?.users || DEMO_USERS);
+  } catch(_) {
+    allUsers = DEMO_USERS;
+  }
+  const students = allUsers.filter(u => u.role === 'student').length;
+  const teachers = allUsers.filter(u => u.role === 'teacher').length;
+  const hods     = allUsers.filter(u => u.role === 'hod').length;
+  const admins   = allUsers.filter(u => u.role === 'admin').length;
+  ['uStatStudents','uStatTeachers','uStatHods','uStatAdmins'].forEach((id,i) => {
+    animateCounter(id, [students,teachers,hods,admins][i]);
+  });
+  renderUsers();
+}
+
+function setUFilter(f, btn) {
+  uFilter = f;
+  document.querySelectorAll('[data-u-filter]').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  renderUsers();
+}
+
+function renderUsers() {
+  const q    = (document.getElementById('uSearch')?.value || '').toLowerCase();
+  const list = document.getElementById('usersList');
+  const ROLE_ICON  = { student:'👨‍🎓', teacher:'👨‍🏫', hod:'🔑', admin:'🏛️' };
+  const ROLE_COLOR = { student:'var(--accent)', teacher:'var(--info)', hod:'var(--warning)', admin:'var(--danger)' };
+
+  let f = allUsers;
+  if (uFilter !== 'all') f = f.filter(u => u.role === uFilter);
+  if (q) f = f.filter(u =>
+    (u.name||'').toLowerCase().includes(q) ||
+    (u.email||'').toLowerCase().includes(q) ||
+    (u.role||'').toLowerCase().includes(q)
+  );
+
+  if (!f.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🔍</div><p>No users found.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = `<div class="tickets-list">${f.map(u => `
+    <div class="tk" style="cursor:default">
+      <div class="tk-icon" style="background:rgba(0,0,0,.3);border:1px solid var(--border);width:38px;height:38px;display:grid;place-items:center;border-radius:10px;flex-shrink:0">
+        ${ROLE_ICON[u.role] || '👤'}
+      </div>
+      <div class="tk-body">
+        <div class="tk-title">${escapeHTML(u.name || 'Unknown')}</div>
+        <div class="tk-meta">
+          <span style="font-size:.75rem;color:var(--subtle)">${escapeHTML(u.email || '—')}</span>
+        </div>
+        <div class="tk-meta" style="margin-top:4px">
+          <span style="font-size:.72rem;color:var(--subtle)">${escapeHTML(u.department || '—')}</span>
+          ${u.created_at ? `<span class="tk-time">Joined ${new Date(u.created_at).toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</span>` : ''}
+        </div>
+      </div>
+      <div class="tk-actions" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="rbadge rb-${u.role}" style="font-size:.7rem">${escapeHTML(u.role||'student')}</span>
+        <select onclick="event.stopPropagation()"
+          onchange="adminUpdateRole(${u.id}, this.value)"
+          style="font-size:.72rem;padding:3px 7px;border-radius:6px;background:rgba(0,0,0,.4);border:1px solid var(--border);color:var(--text);cursor:pointer">
+          <option value="student" ${u.role==='student'?'selected':''}>Student</option>
+          <option value="teacher" ${u.role==='teacher'?'selected':''}>Teacher</option>
+          <option value="hod"     ${u.role==='hod'?'selected':''}>HOD</option>
+          <option value="admin"   ${u.role==='admin'?'selected':''}>Admin</option>
+        </select>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function adminUpdateRole(id, newRole) {
+  try {
+    await apiCall(`/users/${id}`, 'PATCH', { role: newRole });
+    const u = allUsers.find(x => x.id === id);
+    if (u) u.role = newRole;
+    // Refresh counters
+    const students = allUsers.filter(u => u.role==='student').length;
+    const teachers = allUsers.filter(u => u.role==='teacher').length;
+    const hods     = allUsers.filter(u => u.role==='hod').length;
+    const admins   = allUsers.filter(u => u.role==='admin').length;
+    ['uStatStudents','uStatTeachers','uStatHods','uStatAdmins'].forEach((id,i) => {
+      document.getElementById(id).textContent = [students,teachers,hods,admins][i];
+    });
+  } catch(_) {}
+}
+
+/* ══════════════════════════════════════════════
+   EXPLORE PAGE
+══════════════════════════════════════════════ */
+let exploreTickets = [];
+let exFilter = 'all';
+
+const DEMO_EXPLORE = [
+  { id:201, title:'Wi-Fi keeps disconnecting in Block B classrooms',      status:'open',        category:'technical', department:'General / University-wide',                 upvotes:34, user_name:'Rahul V.',   created_at: new Date(Date.now()-1800000).toISOString()   },
+  { id:202, title:'BCom Sem 4 timetable has clashing slots',              status:'in_progress', category:'academic',  department:'School of Commerce, Finance & Accountancy', upvotes:28, user_name:'Priya S.',   created_at: new Date(Date.now()-7200000).toISOString()   },
+  { id:203, title:'Canteen not accepting UPI payments since Monday',      status:'open',        category:'admin',     department:'General / University-wide',                 upvotes:61, user_name:'Dev K.',     created_at: new Date(Date.now()-10800000).toISOString()  },
+  { id:204, title:'LMS assignment submission button missing on mobile',   status:'resolved',    category:'technical', department:'School of Business & Management',           upvotes:19, user_name:'Sneha I.',   created_at: new Date(Date.now()-86400000).toISOString()  },
+  { id:205, title:'Scholarship portal shows "Access Denied" error',       status:'open',        category:'finance',   department:'General / University-wide',                 upvotes:47, user_name:'Arjun M.',   created_at: new Date(Date.now()-172800000).toISOString() },
+  { id:206, title:'Library catalogue search not returning results',       status:'in_progress', category:'technical', department:'School of Law',                             upvotes:15, user_name:'Meera N.',   created_at: new Date(Date.now()-259200000).toISOString() },
+  { id:207, title:'Internal marks for Physics not updated on portal',     status:'open',        category:'academic',  department:'School of Sciences',                        upvotes:39, user_name:'Karan P.',   created_at: new Date(Date.now()-345600000).toISOString() },
+  { id:208, title:'Hostel fee receipt not generated after payment',       status:'resolved',    category:'finance',   department:'General / University-wide',                 upvotes:22, user_name:'Nisha R.',   created_at: new Date(Date.now()-432000000).toISOString() },
+];
+
+async function loadExplore() {
+  document.getElementById('exploreList').innerHTML =
+    `<div class="empty-state"><div class="es-icon">⏳</div><p>Loading…</p></div>`;
+  try {
+    const data = await apiCall('/tickets/explore');
+    exploreTickets = Array.isArray(data) ? data : (data?.tickets || DEMO_EXPLORE);
+  } catch(_) {
+    exploreTickets = DEMO_EXPLORE;
+  }
+  renderExplore();
+}
+
+function setExFilter(f, btn) {
+  exFilter = f;
+  document.querySelectorAll('[data-ex-filter]').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  renderExplore();
+}
+
+function renderExplore() {
+  const q    = (document.getElementById('exploreSearch')?.value || '').toLowerCase();
+  const list = document.getElementById('exploreList');
+  const SC   = { open:'pl-open', in_progress:'pl-in_progress', resolved:'pl-resolved', closed:'pl-closed' };
+  const IC   = { academic:'📚', admin:'🏛️', technical:'💻', finance:'💰', other:'💬' };
+
+  let f = [...exploreTickets].sort((a,b) => (b.upvotes||0) - (a.upvotes||0));
+  if (exFilter !== 'all') f = f.filter(t => t.category === exFilter);
+  if (q) f = f.filter(t =>
+    (t.title||'').toLowerCase().includes(q) ||
+    (t.department||'').toLowerCase().includes(q)
+  );
+
+  if (!f.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🔍</div><p>No tickets match.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = `<div class="tickets-list">${f.map((t,i) => `
+    <div class="tk" style="cursor:default">
+      <!-- Rank badge for top 3 -->
+      <div class="tk-icon" style="position:relative">
+        ${IC[t.category] || '💬'}
+        ${i < 3 ? `<span style="position:absolute;top:-6px;right:-6px;font-size:.6rem;background:var(--accent);color:#000;border-radius:4px;padding:1px 4px;font-weight:700">#${i+1}</span>` : ''}
+      </div>
+      <div class="tk-body">
+        <div class="tk-title">${escapeHTML(t.title || 'Untitled')}</div>
+        <div class="tk-meta">
+          <span class="pill ${SC[t.status] || 'pl-open'}">${escapeHTML((t.status||'open').replace('_',' '))}</span>
+          ${t.category ? `<span class="cat-pill cat-${t.category}">${escapeHTML(t.category)}</span>` : ''}
+          ${t.user_name ? `<span style="font-size:.72rem;color:var(--subtle)">👤 ${escapeHTML(t.user_name)}</span>` : ''}
+          ${t.created_at ? `<span class="tk-time">${timeAgo(new Date(t.created_at))}</span>` : ''}
+        </div>
+      </div>
+      <div class="tk-actions">
+        <button class="uv-btn ${(t._voted)?'voted':''}"
+          onclick="exploreUpvote(${t.id}, this)"
+          style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:48px">
+          <span>⬆</span>
+          <span id="exUv${t.id}" style="font-size:.8rem;font-weight:700">${t.upvotes||0}</span>
+        </button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function exploreUpvote(id, btn) {
+  btn.classList.toggle('voted');
+  const t = exploreTickets.find(x => x.id === id);
+  if (!t) return;
+  const delta = btn.classList.contains('voted') ? 1 : -1;
+  t.upvotes  = Math.max(0, (t.upvotes||0) + delta);
+  t._voted   = btn.classList.contains('voted');
+  const el = document.getElementById(`exUv${id}`);
+  if (el) el.textContent = t.upvotes;
+  try { await apiCall(`/tokens/${id}/upvote`, 'POST'); } catch(_) {}
+}
+
 </script>
 </body>
 </html>
